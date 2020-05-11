@@ -19,7 +19,7 @@ You are now automatically streaming events into Apache Kafka from the packet cap
 Check to make sure:
 
 ```
-docker-compose exec ksqldb-cli ksql http://ksqldb-server:8088
+$ docker-compose exec ksqldb-cli ksql http://ksqldb-server:8088
                   
                   ===========================================
                   =       _              _ ____  ____       =
