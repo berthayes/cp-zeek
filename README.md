@@ -1,8 +1,8 @@
 # Streaming Zeek Events with Apache Kafka and ksqlDB
 
-This is customized version of the cp-all-in-one-community demo available here: https://github.com/confluentinc/cp-all-in-one/
+This is a customized version of the cp-all-in-one-community demo available here: https://github.com/confluentinc/cp-all-in-one/
 
-This version includes an additional image: [bertisondocker/zeek-tcpreplay-kafka](https://github.com/berthayes/zeek-tcpreplay-kafka) This Docker image automatically reads a packet capture saved to ```./pcaps/zeek_streamer``` using ```tcpreplay``` to stream the data to a ```dummy0``` network interface that is monitored by [Zeek](https://zeek.org) which streams all of its output to Apache Kafka in real time.
+This version includes an additional image: [bertisondocker/zeek-tcpreplay-kafka](https://github.com/berthayes/zeek-tcpreplay-kafka) This Docker image automatically reads a packet capture saved to ```./pcaps/zeek_streamer.pcap``` using ```tcpreplay``` to stream the data to a ```dummy0``` network interface that is monitored by [Zeek](https://zeek.org) which streams all of its output to Apache Kafka in real time.
 
 This version does NOT include Connect.
 
