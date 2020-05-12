@@ -12,7 +12,7 @@ This version DOES include ksqlDB.
 
 * ```git clone https://github.com/berthayes/cp-all-in-one-community-with-zeek.git```
 * ```cd cp-all-in-one-community-with-zeek```
-* ```docker-compose up -d --build```
+* ```docker-compose up -d```
 
 You are now automatically streaming events into Apache Kafka from the packet capture you had in ```pcaps/zeek_streamer.pcap```
 
