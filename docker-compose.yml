@@ -69,6 +69,8 @@ services:
       - ksqldb-server
     entrypoint: /bin/sh
     tty: true
+    volumes:
+      - ./ksqldb_scripts:/ksqldb_scripts
 
   rest-proxy:
     image: confluentinc/cp-kafka-rest:5.5.0
