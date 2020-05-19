@@ -1,25 +1,23 @@
 # Streaming Zeek Events with Apache Kafka and ksqlDB
 
-This is a customized version of the cp-all-in-one-community demo available here: https://github.com/confluentinc/cp-all-in-one/
+This is a customization of the cp-all-in-one-community demo available here: https://github.com/confluentinc/cp-all-in-one/
 
-This version includes an additional image: [bertisondocker/zeek-tcpreplay-kafka](https://github.com/berthayes/zeek-tcpreplay-kafka) This Docker image automatically reads a packet capture saved to ```./pcaps/zeek_streamer.pcap``` using ```tcpreplay``` to stream the data to a ```dummy0``` network interface that is monitored by [Zeek](https://zeek.org) which streams all of its output to Apache Kafka in real time.
+This version includes an additional image: [bertisondocker/zeek-tcpreplay-kafka](https://github.com/berthayes/zeek-tcpreplay-kafka) for generating [Zeek](https://zeek.org) data to stream to Apache Kafka in real time.
 
-This version does NOT include Connect.
-
-This version DOES include ksqlDB.
+This version now includes ALL of pieces of Confluent Community, including ksqlDB.
 
 ## How Do I Work This?
 
 * ```git clone https://github.com/berthayes/cp-all-in-one-community-with-zeek.git```
 * ```cd cp-all-in-one-community-with-zeek```
-* ```docker-compose up -d```
+* ```docker-compose -f docker-compose.yml -f cp-all-in-one/cp-all-in-one-community/docker-compose.yml up -d```
 
 You are now automatically streaming events into Apache Kafka from the packet capture you had in ```pcaps/zeek_streamer.pcap```
 
 Check to make sure:
 
 ```
-$ docker-compose exec ksqldb-cli ksql http://ksqldb-server:8088
+$ docker exec -it ksqldb-cli ksql http://ksqldb-server:8088
                   
                   ===========================================
                   =       _              _ ____  ____       =

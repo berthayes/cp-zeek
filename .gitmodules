@@ -1,0 +1,3 @@
+[submodule "cp-all-in-one"]
+	path = cp-all-in-one
+	url = https://github.com/confluentinc/cp-all-in-one
