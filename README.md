@@ -8,7 +8,7 @@ This version now includes ALL of pieces of Confluent Community, including ksqlDB
 
 ## How Do I Work This?
 
-* ```git clone https://github.com/berthayes/cp-all-in-one-community-with-zeek.git```
+* ```git clone --recurse-submodules https://github.com/berthayes/cp-all-in-one-community-with-zeek.git```
 * ```cd cp-all-in-one-community-with-zeek```
 * ```docker-compose -f docker-compose.yml -f cp-all-in-one/cp-all-in-one-community/docker-compose.yml up -d```
 
