@@ -4,7 +4,7 @@ This is a customization of the cp-all-in-one-community demo available here: http
 
 This version includes an additional Docker image: [bertisondocker/zeek-tcpreplay-kafka](https://github.com/berthayes/zeek-tcpreplay-kafka) for generating [Zeek](https://zeek.org) data to stream to Apache Kafka in real time.
 
-This version now includes ALL of pieces of Confluent Community, including ksqlDB.
+This version now includes ALL of pieces of Confluent Community, including Kafka Connect.
 
 ## How Do I Work This?
 
