@@ -1,68 +1,15 @@
 # Streaming Zeek Events with Apache Kafka and ksqlDB
 
-This is a customization of the cp-all-in-one-community demo available here: https://github.com/confluentinc/cp-all-in-one/
+This is a customization of the cp-all-in-one-community example available here: https://github.com/confluentinc/cp-all-in-one/
 
-This version includes an additional Docker image: [bertisondocker/zeek-tcpreplay-kafka](https://github.com/berthayes/zeek-tcpreplay-kafka) for generating [Zeek](https://zeek.org) data to stream to Apache Kafka in real time.
 
-This version now includes ALL of pieces of Confluent Community, including Kafka Connect.
-
-## How Do I Work This?
-
-* ```git clone --recurse-submodules https://github.com/berthayes/cp-all-in-one-community-with-zeek.git```
-* ```cd cp-all-in-one-community-with-zeek```
-* ```docker-compose -f docker-compose.yml -f cp-all-in-one/cp-all-in-one-community/docker-compose.yml up -d```
-
-You are now automatically streaming events into Apache Kafka from the packet capture you had in ```pcaps/zeek_streamer.pcap```
-
-Check to make sure:
-
-```
-$ docker exec -it ksqldb-cli ksql http://ksqldb-server:8088
-                  
-                  ===========================================
-                  =       _              _ ____  ____       =
-                  =      | | _____  __ _| |  _ \| __ )      =
-                  =      | |/ / __|/ _` | | | | |  _ \      =
-                  =      |   <\__ \ (_| | | |_| | |_) |     =
-                  =      |_|\_\___/\__, |_|____/|____/      =
-                  =                   |_|                   =
-                  =  Event Streaming Database purpose-built =
-                  =        for stream processing apps       =
-                  ===========================================
-
-Copyright 2017-2020 Confluent Inc.
-
-CLI v5.5.0, Server v5.5.0 located at http://ksqldb-server:8088
-
-Having trouble? Type 'help' (case-insensitive) for a rundown of how things work!
-
-ksql> LIST TOPICS;
-
- Kafka Topic    | Partitions | Partition Replicas 
---------------------------------------------------
- RICH_DNS       | 1          | 1                  
- conn           | 1          | 1                  
- dhcp           | 1          | 1                  
- dns            | 1          | 1                  
- files          | 1          | 1                  
- http           | 1          | 1                  
- known_services | 1          | 1                  
- software       | 1          | 1                  
- ssl            | 1          | 1                  
- weird          | 1          | 1                  
- x509           | 1          | 1                  
---------------------------------------------------
-ksql> 
-```
-
-Congratulations!  You've got this demo/lab environment up and running - time to have some fun!
-
-# ksqlDB for Streaming Zeek IDS Data
 
 ### Recommended Reading
 
 This guide is partly based on the Confluent Quick Start Guide for Confluent Platform:
 https://docs.confluent.io/current/quickstart/cos-docker-quickstart.html#cos-docker-quickstart
+
+This example includes an additional Docker image: [bertisondocker/zeek-tcpreplay-kafka](https://github.com/berthayes/zeek-tcpreplay-kafka) for generating [Zeek](https://zeek.org) data to stream to Apache Kafka in real time.
 
 You might want the ksqlDB syntax reference to be handy:
 https://docs.ksqldb.io/en/latest/developer-guide/syntax-reference/
@@ -90,7 +37,9 @@ $ mv ~/Downloads/garage_net.pcap pcaps/zeek_streamer.pcap
 Start up the Docker images:
 
 ```
-$ docker-compose -f docker-compose.yml -f cp-all-in-one/cp-all-in-one-community/docker-compose.yml -f docker-compose-override.yml up -d
+$ docker-compose -f docker-compose.yml \
+-f cp-all-in-one/cp-all-in-one-community/docker-compose.yml \
+-f docker-compose-override.yml up -d
 ```
 
 It might take a couple of minutes for files to download and images to start up.
@@ -99,18 +48,18 @@ It might take a couple of minutes for files to download and images to start up.
 $ docker ps
 ```
 
-You should have six different images running:
+You should have nine different images running:
 ```
-confluentinc/cp-kafka-rest:5.5.0
 confluentinc/cp-ksqldb-cli:5.5.0
-confluentinc/cp-schema-registry:5.5.0
-bertisondocker/zeek-tcpreplay-kafka:latest
+confluentinc/ksqldb-examples:5.5.0
 confluentinc/cp-ksqldb-server:5.5.0
+cnfldemos/kafka-connect-datagen:0.3.2-5.5.0
+confluentinc/cp-kafka-rest:5.5.0
+bertisondocker/zeek-tcpreplay-kafka:latest
+confluentinc/cp-schema-registry:5.5.0
 confluentinc/cp-kafka:5.5.0
 confluentinc/cp-zookeeper:5.5.0
 ```
-
-If you don’t have those six different Docker images up and running, now is the best time to please stop and ask for help.
 
 One of the running Docker images is responsible for reading the pcap file you downloaded earlier, and sending events from Zeek to Apache Kafka.  This image starts sending data automatically at start time, and the Apache Kafka broker is configured to create topics automatically when it receives them.  As soon as the environment is up and running, events are streaming into Kafka.
 
