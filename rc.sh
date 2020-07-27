@@ -1,7 +1,7 @@
 #!/bin/sh
 
 
-key="/Users/bhayes/Downloads/bert_confluent_aws_keypem.pem"
+key="/home/ubuntu/bert_confluent_aws_keypem.pem"
 
 
 if [ $1 = "c" ]; then
