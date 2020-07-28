@@ -1,7 +1,7 @@
 #!/bin/sh
 
 
-key="/home/ubuntu/bert_confluent_aws_keypem.pem"
+key="/home/ubuntu/.ssh/id_rsa"
 
 
 if [ $1 = "c" ]; then
