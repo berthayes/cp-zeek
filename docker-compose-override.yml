@@ -1,6 +1,0 @@
----
-version: '2'
-services:
-  ksqldb-cli:
-    volumes:
-      - ./ksqldb_scripts:/ksqldb_scripts

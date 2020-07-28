@@ -13,7 +13,7 @@ def create_instance(host_job, iteration):
     workshop_hostname = host_job + "-" + iteration
     print("Creating Instance ", workshop_host)
     ec2.create_instances(
-        #DryRun=True,
+        # DryRun=True,
         BlockDeviceMappings=[
             {
                 'DeviceName': '/dev/sda1',
@@ -69,7 +69,6 @@ def create_instance(host_job, iteration):
     print(vm_name, " has been created")
 
 
-
 for i in range(hosts_already_created, how_many_hosts_to_create):
-    create_instance('ksqldb', str(i + 1))
+    # create_instance('ksqldb', str(i + 1))
     create_instance('c3', str(i + 1))
