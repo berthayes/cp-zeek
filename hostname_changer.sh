@@ -1,7 +1,7 @@
 #!/bin/bash
 # This file gets run on the controller
-file='aws_host_info.csv'
-key='/home/ubuntu/bert_confluent_aws_keypem.pem'
+file='aws_host_info.txt'
+key='/home/ubuntu/.ssh/id_rsa'
 
 while IFS= read -r line; do
   echo $line
