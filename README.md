@@ -114,8 +114,7 @@ If I’m a SOC Analyst, I might want to separate this kind of data to give it fu
 Create a new topic that only has connection data for inbound connections to the local_net 192.168.1.0/24:
 
 ```
-CREATE STREAM INBOUND_STREAM WITH (VALUE_FORMAT='AVRO') AS \
->SELECT * FROM CONN_STREAM WHERE LOCAL_ORIG != true AND "id.resp_h" LIKE '192.168.1%';
+CREATE STREAM INBOUND_STREAM WITH (VALUE_FORMAT='AVRO') AS SELECT * FROM CONN_STREAM WHERE LOCAL_ORIG != true AND "id.resp_h" LIKE '192.168.1%';
 ```
 Note how this created a new topic called INBOUND_STREAM.  Also note that the value format is now AVRO instead of JSON.
 
@@ -131,9 +130,31 @@ SELECT * FROM INBOUND_STREAM EMIT CHANGES;
 
 Take a look at the ksqldb_scripts/ directory in the GitHub repository and review the create_bro_dns_stream.sql file.  ksqlDB supports the ability to run .sql files as scripts, so instead of copy/pasting try this:
 
+Run the ksql-cli be running:
 ```
-SHOW STREAMS;
+$  docker exec -it ksqldb-cli ksql http://ksqldb-server:8088
+                  
+                  ===========================================
+                  =       _              _ ____  ____       =
+                  =      | | _____  __ _| |  _ \| __ )      =
+                  =      | |/ / __|/ _` | | | | |  _ \      =
+                  =      |   <\__ \ (_| | | |_| | |_) |     =
+                  =      |_|\_\___/\__, |_|____/|____/      =
+                  =                   |_|                   =
+                  =  Event Streaming Database purpose-built =
+                  =        for stream processing apps       =
+                  ===========================================
+
+Copyright 2017-2020 Confluent Inc.
+
+CLI v5.5.1, Server v5.5.1 located at http://ksqldb-server:8088
+
+Having trouble? Type 'help' (case-insensitive) for a rundown of how things work!
+
+ksql>
 ```
+
+
 ```
 ksql> RUN SCRIPT /ksqldb_scripts/create_bro_dns_stream.sql;
 
