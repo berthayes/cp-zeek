@@ -7,11 +7,17 @@ import re
 # expect to be passed a hostname and an IP
 # ksqldb-1 3.129.90.9
 
+input_file = sys.argv[1]
+if len(input_file) == 0:
+    input_file = 'dns_script_hosts.txt'
+
+
+
 client = boto3.client('route53')
-with open('dns_script_hosts.txt') as f:
+with open(input_file) as f:
   content = f.read().splitlines()
-  print(content)
-  type(content)
+#  print(content)
+#  type(content)
 f.close()
 
 for line in content:

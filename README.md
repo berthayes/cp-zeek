@@ -1,15 +1,10 @@
 # Streaming Zeek Events with Apache Kafka and ksqlDB
 
-This is a customization of the cp-all-in-one-community example available here: https://github.com/confluentinc/cp-all-in-one/
-
-
+This workshop is a customization based on the Quick Start for Apache Kafka Using Confluent Platform (Docker) documentation available here: https://docs.confluent.io/current/quickstart/ce-docker-quickstart.html
 
 ### Recommended Reading
 
-This guide is partly based on the Confluent Quick Start Guide for Confluent Platform:
-https://docs.confluent.io/current/quickstart/cos-docker-quickstart.html#cos-docker-quickstart
-
-This example includes an additional Docker image: [bertisondocker/zeek-tcpreplay-kafka](https://github.com/berthayes/zeek-tcpreplay-kafka) for generating [Zeek](https://zeek.org) data to stream to Apache Kafka in real time.
+This workshop leverages an additional Docker image: [bertisondocker/zeek-tcpreplay-kafka](https://github.com/berthayes/zeek-tcpreplay-kafka) for generating [Zeek](https://zeek.org) data to stream to Apache Kafka in real time.
 
 You might want the ksqlDB syntax reference to be handy:
 https://docs.ksqldb.io/en/latest/developer-guide/syntax-reference/
@@ -17,108 +12,26 @@ https://docs.ksqldb.io/en/latest/developer-guide/syntax-reference/
 
 ### Set Up Demo Environment
 
-The [zeek-tcp-replay](https://github.com/berthayes/zeek-tcpreplay-kafka) Docker image includes a pcap file for streaming and analysis.  This file is named zeek-streamer.pcap  An additional, optional pcap file is available here:  https://drive.google.com/open?id=1wMCm_ByWlkI4Zym_Stim-xUK4Zb4Zm5Q
+This repository is for creating a classroom environment for the ksqlDB workshop.
+The python scripts use boto3 to talk to the AWS API for automating provisioning, and the shell scripts manage the hosts once they're running.
 
-This pcap is 1GB in size and was originally captured over an hour or so.  The local network is 192.168.1.0/24 and there are maybe a dozen or so hosts that are active.  Some hosts are more active than others, and some hosts’ activities are more interesting than others.
+This is pretty stone-age.  There are probably easier ways to do this.
 
-To get started, open a terminal window and clone the git repository as shown below.  Backup the default pcap file and replace it with the garage_net.pcap you downloaded from Google Drive.
+Check the instructions.txt for how to create the classroom environment.
 
-```
-$ git clone --recurse-submodules https://github.com/berthayes/cp-all-in-one-community-with-zeek.git
-$ cd cp-all-in-one-community-with-zeek
-$ mv pcaps/zeek_streamer.pcap pcaps/repo.pcap
-```
-Move the file garage_net.pcap to the pcaps directory in the cloned repository:
+The [zeek-tcp-replay](https://github.com/berthayes/zeek-tcpreplay-kafka) Docker image includes a pcap file for streaming and analysis.  
 
-```
-$ mv ~/Downloads/garage_net.pcap pcaps/zeek_streamer.pcap
-```
+The pcap we're using in this workshop is available here:
+https://drive.google.com/open?id=1wMCm_ByWlkI4Zym_Stim-xUK4Zb4Zm5Q
 
-Start up the Docker images:
+It's around 1GB in size and was originally captured over an hour or so.  The local network is 192.168.1.0/24 and there are maybe a dozen or so hosts that are active.  Some hosts are more active than others, and some hosts’ activities are more interesting than others.
 
-```
-$ docker-compose -f docker-compose.yml \
--f cp-all-in-one/cp-all-in-one-community/docker-compose.yml \
--f docker-compose-override.yml up -d
-```
 
-It might take a couple of minutes for files to download and images to start up.
-
-```
-$ docker ps
-```
-
-You should have nine different images running:
-```
-confluentinc/cp-ksqldb-cli:5.5.0
-confluentinc/ksqldb-examples:5.5.0
-confluentinc/cp-ksqldb-server:5.5.0
-cnfldemos/kafka-connect-datagen:0.3.2-5.5.0
-confluentinc/cp-kafka-rest:5.5.0
-bertisondocker/zeek-tcpreplay-kafka:latest
-confluentinc/cp-schema-registry:5.5.0
-confluentinc/cp-kafka:5.5.0
-confluentinc/cp-zookeeper:5.5.0
-```
-
-One of the running Docker images is responsible for reading the pcap file you downloaded earlier, and sending events from Zeek to Apache Kafka.  This image starts sending data automatically at start time, and the Apache Kafka broker is configured to create topics automatically when it receives them.  As soon as the environment is up and running, events are streaming into Kafka.
+One of the running Docker images is responsible for reading the alternate pcap and sending events from Zeek to Apache Kafka.  This image starts sending data automatically at start time, and the Apache Kafka broker is configured to create topics automatically when it receives them.  As soon as the environment is up and running, events are streaming into Kafka.
 
 ### Start Processing Data with Apache Kafka & ksqlDB
 
-Make sure you’re still in the cp-all-in-one-community-with-zeek directory and run the kafka-console-consumer to watch a topic (prove that data is flowing).  Pipe the output through jq to keep it pretty:
 
-```
-$ docker exec broker /usr/bin/kafka-console-consumer --bootstrap-server localhost:9092 --topic files | jq
-```
-
-Try the command above with dns instead of files.
-
-```
-$ docker exec broker /usr/bin/kafka-console-consumer --bootstrap-server localhost:9092 --topic dns | jq
-```
-
-In this case, topics are automatically created with the same name Zeek would give to their respective log files (e.g. dns, conn, http, ssl, x509, etc.)
-
-### Run the ksqlDB CLI:
-
-```
-$ cd cp-all-in-one-community-with-zeek
-$ docker exec -it ksqldb-cli ksql http://ksqldb-server:8088
-
-ksql> SHOW TOPICS;
-
- Kafka Topic    | Partitions | Partition Replicas 
---------------------------------------------------
- conn           | 1          | 1                  
- dhcp           | 1          | 1                  
- dns            | 1          | 1                  
- files          | 1          | 1                  
- http           | 1          | 1                  
- known_services | 1          | 1                  
- software       | 1          | 1                  
- ssl            | 1          | 1                  
- weird          | 1          | 1                  
- x509           | 1          | 1                  
---------------------------------------------------
-ksql> 
-```
-
-ksqlDB has the ```PRINT``` command, which will print events from topics similar to the console-consumer above:
-
-```
-ksql> PRINT 'files' LIMIT 1;
-```
-
-Although we have topics, we haven’t created any streams or tables from them:
-
-```
-ksql> LIST STREAMS;
-
- Stream Name | Kafka Topic | Format 
-------------------------------------
-------------------------------------
-ksql> 
-```
 
 ### Creating a Stream with Conn Data
 
@@ -173,25 +86,25 @@ WITH (KAFKA_TOPIC='conn', VALUE_FORMAT='JSON');
 Now that you’ve created this stream, you can query it with ksqlDB.
 
 ```
-ksql> SELECT * FROM CONN_STREAM WHERE LOCAL_ORIG = true EMIT CHANGES LIMIT 10;
+SELECT * FROM CONN_STREAM WHERE LOCAL_ORIG = true EMIT CHANGES LIMIT 10;
 ```
 The Zeek conn logs will keep track of whether a connection originated from the local network, or whether it came in from the outside.  Very handy!  Run the same search, but look for connections that originate from outside the local network:
 
 ```
-ksql> SELECT * FROM CONN_STREAM WHERE LOCAL_ORIG != true EMIT CHANGES;
+SELECT * FROM CONN_STREAM WHERE LOCAL_ORIG != true EMIT CHANGES;
 ```
 You can sit and watch this query for a while, but there are very few (if any?) connections that originate from outside the network.  When I run this search, I get some ipv6 stuff, which mostly reflects that my ```local_nets``` value is ipv4 only.
 
 Here’s a query that will look for any connections that did not originate locally, and that are destined for the local_net 192.168.1.0/24:
 
 ```
-ksql> SELECT * FROM CONN_STREAM WHERE LOCAL_ORIG != true AND "id.resp_h" LIKE '192.168.1%' EMIT CHANGES;
+SELECT * FROM CONN_STREAM WHERE LOCAL_ORIG != true AND "id.resp_h" LIKE '192.168.1%' EMIT CHANGES;
 ```
 
 You can sit and watch this query for a REALLY long time and not see much happen.  Here’s where we can take advantage of the ability to replay a stream from the beginning of a topic.  Set auto.offset.reset to earliest as shown below.
 
 ```
-ksql> SET 'auto.offset.reset'='earliest';
+SET 'auto.offset.reset'='earliest';
 ```
 
 This will start reading events at the earliest offset instead of the latest.  Now re-run the above search to find incoming connections starting from the first recorded event.
@@ -201,30 +114,17 @@ If I’m a SOC Analyst, I might want to separate this kind of data to give it fu
 Create a new topic that only has connection data for inbound connections to the local_net 192.168.1.0/24:
 
 ```
-ksql> CREATE STREAM INBOUND_STREAM WITH (VALUE_FORMAT='AVRO') AS \
+CREATE STREAM INBOUND_STREAM WITH (VALUE_FORMAT='AVRO') AS \
 >SELECT * FROM CONN_STREAM WHERE LOCAL_ORIG != true AND "id.resp_h" LIKE '192.168.1%';
 ```
 Note how this created a new topic called INBOUND_STREAM.  Also note that the value format is now AVRO instead of JSON.
 
 ```
-ksql> SHOW TOPICS;
+SHOW TOPICS;
+```
 
- Kafka Topic    | Partitions | Partition Replicas 
---------------------------------------------------
- INBOUND_STREAM | 1          | 1                  
- conn           | 1          | 1                  
- dhcp           | 1          | 1                  
- dns            | 1          | 1                  
- files          | 1          | 1                  
- http           | 1          | 1                  
- known_services | 1          | 1                  
- software       | 1          | 1                  
- ssl            | 1          | 1                  
- weird          | 1          | 1                  
- x509           | 1          | 1                  
---------------------------------------------------
-
-ksql> SELECT * FROM INBOUND_STREAM EMIT CHANGES;
+```
+SELECT * FROM INBOUND_STREAM EMIT CHANGES;
 ```
 
 ### Creating a Stream with DNS Data
@@ -232,13 +132,9 @@ ksql> SELECT * FROM INBOUND_STREAM EMIT CHANGES;
 Take a look at the ksqldb_scripts/ directory in the GitHub repository and review the create_bro_dns_stream.sql file.  ksqlDB supports the ability to run .sql files as scripts, so instead of copy/pasting try this:
 
 ```
-ksql> SHOW STREAMS;
-
- Stream Name    | Kafka Topic    | Format 
-------------------------------------------
- CONN_STREAM    | conn           | JSON   
- INBOUND_STREAM | INBOUND_STREAM | AVRO   
-------------------------------------------
+SHOW STREAMS;
+```
+```
 ksql> RUN SCRIPT /ksqldb_scripts/create_bro_dns_stream.sql;
 
  Message        
@@ -257,15 +153,15 @@ ksql> SHOW STREAMS;
 Congratulations!  You now have Zeek conn data AND Zeek DNS data as streams to analyze in ksqlDB.
 
 ```
-ksql> SELECT "query", COUNT("query") AS LOOKUPS FROM DNS_STREAM GROUP BY "query" EMIT CHANGES;
+SELECT "query", COUNT("query") AS LOOKUPS FROM DNS_STREAM GROUP BY "query" EMIT CHANGES;
 ```
 Take a look at an example of a DNS event as it is recorded by the Zeek connection logger:
 ```
-ksql> SELECT * FROM CONN_STREAM WHERE "id.resp_p"=53 AND PROTO='udp' EMIT CHANGES LIMIT 1;
+SELECT * FROM CONN_STREAM WHERE "id.resp_p"=53 AND PROTO='udp' EMIT CHANGES LIMIT 1;
 ```
 Now take a look at an example of a DNS event as it’s recorded by the Zeek DNS logger:
 ```
-ksql> SELECT * FROM DNS_STREAM WHERE "id.resp_p"=53 AND PROTO='udp' EMIT CHANGES LIMIT 1;
+SELECT * FROM DNS_STREAM WHERE "id.resp_p"=53 AND PROTO='udp' EMIT CHANGES LIMIT 1;
 ```
 Notice how the CONN_STREAM event has byte counts associated with the traffic, but not the DNS query or reply information?  And how the DNS_STREAM event has the DNS information, but not byte counts?
 
@@ -295,21 +191,17 @@ SELECT d."query",
     c.LOCAL_ORIG 
 FROM DNS_STREAM d INNER JOIN CONN_STREAM c WITHIN 1 MINUTES ON d.UID = c.UID WHERE LOCAL_ORIG = true;
 ```
-You can run this by copying and pasting it at the ksql> prompt, or by running it as a script from the ksql> prompt:
-```
-ksql> RUN SCRIPT /ksqldb_scripts/create_rich_dns_stream.sql;
-```
-If your auto.offset.reset value is still set to earliest, now is a good time to set it to latest:
-```
-ksql> SET 'auto.offset.reset'='latest';
-```
+Copy and paste this into the ksqlDB editor in Control Center
+
+Make sure that auto.offset.reset is set to Latest.
+
 Take a look at the documentation on how ksqlDB handles tumbling windows and time processing:
 https://docs.ksqldb.io/en/latest/concepts/time-and-windows-in-ksqldb-queries/
 
 This query will count the number of hostnames queried (e.g. the “www” in www.example.org) by a specific IP address.  The query uses a Tumbling window of 5 minutes to keep a running tally:
 
 ```
-ksql> SELECT SRC_IP, HOSTNAME, COUNT(HOSTNAME) AS COUNT_HOSTNAME \
+SELECT SRC_IP, HOSTNAME, COUNT(HOSTNAME) AS COUNT_HOSTNAME \
 FROM RICH_DNS WINDOW TUMBLING (SIZE 5 MINUTES) \
 GROUP BY SRC_IP, HOSTNAME EMIT CHANGES;
 ```
@@ -319,14 +211,14 @@ GROUP BY SRC_IP, HOSTNAME EMIT CHANGES;
 Run the following scripts to create the SSL_STREAM and X509_STREAM:
 
 ```
-ksql> RUN SCRIPT /ksqldb_scripts/create_bro_ssl_stream.sql;
+RUN SCRIPT /ksqldb_scripts/create_bro_ssl_stream.sql;
 
  Message        
 ----------------
  Stream created 
 ----------------
 
-ksql> RUN SCRIPT /ksqldb_scripts/create_bro_x509_stream.sql;
+RUN SCRIPT /ksqldb_scripts/create_bro_x509_stream.sql;
 
  Message        
 ----------------
@@ -335,7 +227,7 @@ ksql> RUN SCRIPT /ksqldb_scripts/create_bro_x509_stream.sql;
 ```
 Take a look at a single SSL event:
 ```
-ksql> SELECT * FROM SSL_STREAM EMIT CHANGES LIMIT 1;
+SELECT * FROM SSL_STREAM EMIT CHANGES LIMIT 1;
 ```
 Notice how the SSL event has IP and port information, as well as information about the Subject and Issuer of the certificate that was used.  We even get a field called ```VALIDATION_STATUS``` that helpfully indicates that a certificate has expired.  Missing, however, is more detailed information about the certificate itself.
 
@@ -404,22 +296,5 @@ on s.SUBJECT = x."certificate.subject"
 WHERE (UNIX_TIMESTAMP() - (x."certificate.not_valid_before") * 1000) < 2592000000 EMIT CHANGES;
 ```
 
-### Tips and Tricks
-To start off a fresh pcap streaming to Zeek->Confluent:
-Note the --loop option which will replay this pcap a skillion times.
 
-```
-$ cd cp-all-in-one-community-with-zeek
-$ ls pcaps/
-garage_net.pcap  zeek_streamer.pcap
-$ docker exec -d zeek-streamer /usr/bin/tcpreplay --loop=1000000000 -i dummy0 /pcaps/repo.pcap
-```
-Stop Confluent Docker containers:
-```
-$ docker container stop $(docker container ls -a -q -f "label=io.confluent.docker")
-```
 
-Stop Zeek streamer Docker container:
-```
-$ docker stop zeek-streamer
-```
