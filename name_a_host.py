@@ -3,18 +3,22 @@
 import sys
 import boto3
 import re
+from configparser import ConfigParser
+
+cfg = ConfigParser()
+cfg.read('yak_shaving.conf')
+
+pem = cfg.get('aws', 'your_pem')
+workshop_hostname_root = cfg.get('workshop', 'workshop_hostname_root')
+workshop_domain = cfg.get('workshop', 'workshop_domain')
+HostedZoneId = cfg.get('workshop', 'HostedZoneId')
+
 
 # expect to be passed a hostname and an IP
 # ksqldb-1 3.129.90.9
 
-input_file = sys.argv[1]
-if len(input_file) == 0:
-    input_file = 'dns_script_hosts.txt'
-
-
-
 client = boto3.client('route53')
-with open(input_file) as f:
+with open('dns_script_hosts.txt') as f:
   content = f.read().splitlines()
 #  print(content)
 #  type(content)
@@ -22,21 +26,19 @@ f.close()
 
 for line in content:
   pair = line.split()
-  print(pair)
+  #print(pair)
   hostname = pair[0]
-  print(hostname)
+  #print(hostname)
   host_ip = pair[1]
-  print(host_ip)
+  #print(host_ip)
   role_name_and_number = re.split("-", hostname)
   role_name = role_name_and_number[0]
   role_number = role_name_and_number[1]
   if role_name == 'c3':
-      fqdn = 'netcom' + role_number + '.confluentpublicsector.net'
-  elif role_name == 'ksqldb':
-      fqdn = 'ksqldb' + role_number + '.confluentpublicsector.net'
+      fqdn = workshop_hostname_root + role_number + '.' + workshop_domain
 
   response = client.change_resource_record_sets(
-      HostedZoneId = 'Z273IV6G9RGJR2',
+      HostedZoneId = HostedZoneId,
       ChangeBatch = {
           'Comment': 'Bert script creating DNS records',
           'Changes': [

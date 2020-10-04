@@ -1,16 +1,32 @@
 import boto3
+from configparser import ConfigParser
 
 # create a bunch of  new EC2 instance
+# TODO: create command line args to specify config file at least
+
+cfg = ConfigParser()
+cfg.read('yak_shaving.conf')
 
 how_many_hosts_to_create = 3
 hosts_already_created = 0
 
+snapshot_id = cfg.get('aws', 'snapshot_id')
+security_group_id = cfg.get('aws', 'security_group_id')
+ami = cfg.get('aws', 'ami')
+InstanceType = cfg.get('aws', 'InstanceType')
+pem = cfg.get('aws', 'your_pem')
+Owner_Name = cfg.get('aws', 'Owner_Name')
+your_email = cfg.get('aws', 'your_email')
+your_workshop_name = cfg.get('workshop', 'workshop_name')
 
 def create_instance(host_job, iteration):
     ec2 = boto3.resource('ec2')
-    vm_name = 'bhayes-workshop-' + host_job + "-" + iteration
+    vm_name = cfg.get('aws', 'vm_name')
+    vm_name = vm_name + "-" + host_job + "-" + iteration
     workshop_host = host_job
     workshop_hostname = host_job + "-" + iteration
+    SecurityGroupIds = []
+    SecurityGroupIds.append(security_group_id)
     print("Creating Instance ", workshop_host)
     ec2.create_instances(
         # DryRun=True,
@@ -19,21 +35,19 @@ def create_instance(host_job, iteration):
                 'DeviceName': '/dev/sda1',
                 'Ebs': {
                     'DeleteOnTermination': True,
-                    # 'Iops': 123,
-                    'SnapshotId': 'snap-085c8383cc8833286',
+                    'SnapshotId': snapshot_id,
                     'VolumeSize': 250,
                     'VolumeType': 'gp2',
-                    # 'KmsKeyId': 'string',
                     'Encrypted': False
                 }
             }
         ],
-        ImageId='ami-0fc20dd1da406780b',
+        ImageId=ami,
         MinCount=1,
         MaxCount=1,
-        InstanceType='t2.2xlarge',
-        KeyName='bert_confluent_aws_key.pem',
-        SecurityGroupIds=['sg-0af62df04855a3b2d'],
+        InstanceType=InstanceType,
+        KeyName=pem,
+        SecurityGroupIds=SecurityGroupIds,
         TagSpecifications=[
             {
                 'ResourceType': 'instance',
@@ -44,11 +58,11 @@ def create_instance(host_job, iteration):
                     },
                     {
                         'Key': 'Owner_Name',
-                        'Value': 'Bert Hayes'
+                        'Value': Owner_Name
                     },
                     {
                         'Key': 'Owner_Email',
-                        'Value': 'bhayes@confluent.io'
+                        'Value': your_email
                     },
                     {
                         'Key': 'workshop_host',
@@ -56,7 +70,7 @@ def create_instance(host_job, iteration):
                     },
                     {
                         'Key': 'workshop',
-                        'Value': 'dsd'
+                        'Value': your_workshop_name
                     },
                     {
                         'Key': 'workshop_hostname',
@@ -70,5 +84,9 @@ def create_instance(host_job, iteration):
 
 
 for i in range(hosts_already_created, how_many_hosts_to_create):
+    # This script was originally designed to configure 2 hosts for
+    # each student - one for ksqlDB and one for everything else (C3).
+    # In the end, the only 'host_job' was C3, which ran everything.
+
     # create_instance('ksqldb', str(i + 1))
     create_instance('c3', str(i + 1))

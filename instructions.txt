@@ -1,170 +1,122 @@
-# 8. git clone the repo
-# This stuff can be done while the nodes are downloading updates
-# Do this centrally, then copy it later on
+# These instructions are for creating any number of EC2 hosts running Confluent Platform and ksqlDB
+
+# script assumes that the boto3 library can find your .aws/config and .aws/credentials files (in ~/ by default)
+
+# 1. git clone the repo
+# Do this on one host (e.g. your laptop or other EC2 host), then distribute it to additional EC2 hosts later on
 git clone https://github.com/berthayes/cp-zeek.git
 
-
-
+# Got it?  Get in there!
 cd cp-zeek
 
-# Edit the create_aws_instances.py script to match the number of hosts you want to create
-# 1. Run create_aws_instances.py
-#chmod 755 create_aws_instances.py
+# 2. Edit the config file yak_shaving.conf to reflect your AWS environment
+
+# Make sure to change these fields:
+# vm_name = Name_tag_in_AWS
+# security_group_id = sg-XXXXXXXXXXXXXXX
+# owner_name = 'Your Name'
+# your_pem = which_aws.pem
+# your_email = 'you@your.org'
+
+# [workshop]
+# workshop_name = 'your_workshop'
+
+vim yak_shaving.conf
+
+# Optional (recommended) - edit the create_aws_instances.py script to specify how many EC2 instances you want created.  Ideally, 1 per student.
+
+vim create_aws_instances.py
+
+# 3. Run create_aws_instances.py
+
 python3 create_aws_instances.py
 
-# Edit this to only create netcom hosts
-
-#     Wait for completion
+# Wait for completion
 sleep 90
 # sleep longer than that, depending on the number of systems you're spinning up
+# You can check the AWS console to see when all of your hosts are up
 
-# 2. Get IP addresses for hosts
+# 4. Get IP addresses for hosts
+# This will retrieve the public and private IP addresses for each host
+# These will be used to centrally manage each host via scripts.
 
 ./get_private_ip_and_name.py > aws_host_info.txt
 
-# 3. Create /etc/hosts file for controller node
-# ONLY RUN THIS ON AN INTERNAL NODE - otherwise change up the order of what you print from awk
-cat aws_host_info.txt | awk {'print $3, $5'} > workshop_etc_hosts
+# 5. Create host lists
+# This repo contains a few shell scripts that run a for i in `cat hosts.txt`; do
+# kind of loops.  These are designed to distribute files and run commands
+# remotely
 
-cp /etc/hosts ./etc_hosts
-cp /etc/hosts etc_hosts.bak
-cat workshop_etc_hosts >> etc_hosts
-sudo cp etc_hosts /etc/hosts
-# ^^ This is now a script
-./rc.sh a "mv host_file_maker.sh ~/cp-zeek/ && chmod 755 host_file_maker.sh"
+# If your central control node is in AWS in the same VPC, run this command:
 
-# This is kind of a convenience for the admin, maybe not critical to the workshop?
-# Deciding not to mess with /etc/hosts on these boxes
-
-# If the /etc/hosts file gets messed up on a remote host:
-./rscp.sh a default_etc_hosts
-./rc.sh a "sudo mv default_etc_hosts /etc/hosts"
-
-# Awk out hosts into different lists
-#cat aws_host_info.
-# txt | grep ksqldb | awk {'print $3'} > ksqldb_nodes.txt
-#cat aws_host_info.
-# txt | grep c3 | awk {'print $3'} > c3_nodes.txt
 cat aws_host_info.txt | awk {'print $3'} > all_nodes.txt
 
-# TODO: split hosts out into some other kind of grouping?
+# If your central control node is NOT in AWS network space (e.g. your laptop), run this command:
 
-# Create an SSH key if you don't already have one.
+cat aws_host_info.txt | awk {'print $4'} > all_nodes.txt
 
-# 5. Distribute ssh keys
-# This uses your AWS key once, to transfer a different key around to all of the workstations
-# The idea is that you don't want your AWS pem file kicking around all over the place.
-  for i in `cat workshop_etc_hosts | awk {'print $1'}`; do ssh -oStrictHostKeyChecking=no -i ~ubuntu/bert_confluent_aws_keypem.pem $i "echo -n ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDGrnTEts/IyFQm/zxgD12ohsZYoJviSkr8Afgp6Ugef42eeXjfdY1YFkcaqLele6wOHXDW5UNpfW/pdyZIv8slFrrEEdwwDmfmnsTG5ZC7jzJY3nthoAR1l0f1huX2c0ynbqAwd78mYL5knpXR4IGTwVHeS1mn3IpMe0zDYXPRcKYSKUkRNF4uc7Mi77eBEdxkOJ5nc33IIEkiUO9e1NWBYzP8tQzH/J4xVJ+W5f/nuN59ei+P0mfJYt9hPf6MVW7V1tJFdOSbyXUW6/JQT/NSe64u+8STB3OhRlHMBuxIED7AXnq5akQ8bHRYZwEL6am3cUhPuZ4yk+rcQc2p5gJf ubuntu@c3 >> /home/ubuntu/.ssh/authorized_keys"; done
-
-
-# This is the first time you'll SSH into any of these systems, so expect to say yes to the banners
 chmod 755 rscp.sh
-./rscp.sh a workshop_etc_hosts
 chmod 755 rc.sh
-./rc.sh a "cp /etc/hosts ~/etc_hosts && cat workshop_etc_hosts >>etc_hosts && sudo cp etc_hosts /etc/hosts"
 
-# 6. run apt-get update && apt-get upgrade
+# ssh connect to each host to get rid of banner warnings
+
+for i in `cat all_nodes.txt`; do ssh -oStrictHostKeyChecking=no -i your_aws.pem ubuntu@$i ls; done
+
+# 6. Optional (recommended) run apt-get update && apt-get upgrade
 # May as well be on the latest software and avoid any bugs.
 
-#./rc.sh a "sudo apt-get update && sudo apt-get upgrade -y"
-# This will take a while.
-# Maybe do this twice at the same time, once for c hosts and once for k hosts
-./rc.sh c "sudo apt-get update && sudo apt-get upgrade -y"
-./rc.sh k "sudo apt-get update && sudo apt-get upgrade -y"
+./rc.sh a "sudo apt-get update && sudo apt-get upgrade -y"
+# This will take a little while.
 
-#./rc.sh c "sudo reboot"
-#./rc.sh k "sudo reboot"
+./rc.sh a "sudo reboot"
 
-
-# re-run the ip info getter because public IPs will have changed after a system reboot
-#./get_private_ip_and_name.py > aws_host_info
-# txt.
-
-# 4.5 create DNS records for hosts in Route 53
+# 7. create DNS records for hosts in Route 53
 cat aws_host_info.txt | awk {'print $2, $4'} > dns_script_hosts.txt
-
-# Specifically for one or two hosts:
-cat aws_host_info.txt | grep netcom29 | awk {'print $2, $4'} > netcom29
 
 
 chmod 755 name_a_host.py
 ./name_a_host.py
 # By default reads dns_script_hosts.txt
-# Or you can specify a file on input
-./name_a_host.py netcom29
-
-
-# Actually, the public IP probably won't change if rebooted from the command line
-# This will read the dns_script_hosts.txt file and do stuff with it.
-# NOTE: maybe DO THIS AFTER YOU RUN ALL OF THE UPDATES!  (Systems WILL need to be rebooted after updates are applied,and public IPs will change!
 
 
 
-# Run a script to name the hostname on each host
+# 8. Run a script to name the hostname on each host
+# This is done so that hostname matches DNS (set later) and brokers et al are happy
+# Be sure to edit this file re: $public_ip or $private_ip for the SSH commands
 ./hostname_changer.sh
 
-# Turn off ipv6 because it's a PITA
+# 9.         Turn off ipv6 because it's a PITA
 ./rscp.sh a grub
 ./rc.sh a "sudo cp grub /etc/default/grub"
 ./rc.sh a "sudo update-grub"
 
-# 7. Install openjdk and other packages as required
+./rc.sh a "sudo reboot"
 
-#./rc.sh a "sudo apt-get install -y openjdk-11-jdk docker docker-compose"
-# TODO - write a better script that forks off each process
-#./rc.sh c "sudo apt-get install -y openjdk-11-jdk docker docker-compose"
-#./rc.sh k "sudo apt-get install -y openjdk-11-jdk docker docker-compose"
+# 10. Install openjdk and other packages as required
+
 ./rc.sh a "sudo apt-get install -y openjdk-11-jdk docker docker-compose"
 
 
 # Add the ubuntu user to the docker group
 ./rc.sh a "sudo usermod -a -G docker ubuntu"
 
-# Tweak the docker settings to allow for much RAM
-# Maybe that's not required in Linux?
+# 11. Get the GitHub repo on each host
+./rc.sh a "git clone https://github.com/berthayes/cp-zeek
 
-
-
-
-# Create a tarball for copying around:
-cd ../ && tar -cvzf cp-zeek.tgz cp-zeek/
-
-#copy dat dere tarball
-cd cp-zeek
-cp cp-zeek.tgz cp-zeek/
-./rscp.sh a cp-zeek.tgz
-
-# Untar the tarball on each host
-
-./rc.sh a "tar -xvzf cp-zeek.tgz"
-
-
-
-
-# Each host needs its own /etc/hosts file with the internal IPs of itself and the ksqldb server
-
-# sed command to edit the docker-compose.yml file for appropriate ksql hosts
-# Do it on controller node, then copy it around
-
-# Also edit the zeek docker file - probably don't need to do this after all.
-
-# Copy over the custom dsd-docker-compose.yml
-# Actually.... this file should be distributed with the github repo
-
+# 12. Run shell script to edit the docker-compose.yml file to reflect hostname
 ./rc.sh a "chmod 755 ~/cp-zeek/edit-docker-compose.sh"
 ./rc.sh a "sudo /bin/hostname | xargs ~/cp-zeek/edit-docker-compose.sh"
 
 
-# start up the docker service - DON"T START DOCKER UNTIL YOUR DNS IS SETTLED IN YOUR ETC HOSTS FILE
+# 13. Start docker
+./rc.sh a "docker-compose -f /home/ubuntu/cp-zeek/docker-compose.yml up -d"
 
 # Need to restart Docker?
 ./rc.sh a "sudo systemctl enable docker"
 #sudo systemctl start docker
 ./rc.sh a "sudo reboot"
 
-# 9. Copy over a juicy pcap - Done
+# 9. Copy a juicy pcap to cp-zeek/pcaps/
 # Start reading the pcap and loop for a bzillion times
-./rc.sh a "docker exec -d zeek-streamer /usr/bin/tcpreplay --loop=1000000000 -i dummy0 /pcaps/garage_net.pcap"
+./rc.sh a "docker exec -d zeek-streamer /usr/bin/tcpreplay --loop=1000000000 -i dummy0 /pcaps/some_other.pcap"
 
-#Start docker
-./rc.sh a "docker-compose -f /home/ubuntu/cp-zeek/docker-compose.yml up -d"

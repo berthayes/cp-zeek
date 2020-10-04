@@ -2,6 +2,11 @@
 
 This workshop is a customization based on the Quick Start for Apache Kafka Using Confluent Platform (Docker) documentation available here: https://docs.confluent.io/current/quickstart/ce-docker-quickstart.html
 
+This repository is for creating a classroom environment for a ksqlDB workshop.
+The python scripts use boto3 to talk to the AWS API for automating provisioning, and the shell scripts manage the hosts once they're running.
+
+Admittedly, this is pretty stone-age.  There are probably easier ways to do this, but I didn't have time to learn Ansible when I wrote this.
+
 ### Recommended Reading
 
 This workshop leverages an additional Docker image: [bertisondocker/zeek-tcpreplay-kafka](https://github.com/berthayes/zeek-tcpreplay-kafka) for generating [Zeek](https://zeek.org) data to stream to Apache Kafka in real time.
@@ -11,11 +16,6 @@ https://docs.ksqldb.io/en/latest/developer-guide/syntax-reference/
 
 
 ### Set Up Demo Environment
-
-This repository is for creating a classroom environment for the ksqlDB workshop.
-The python scripts use boto3 to talk to the AWS API for automating provisioning, and the shell scripts manage the hosts once they're running.
-
-This is pretty stone-age.  There are probably easier ways to do this.
 
 Check the instructions.txt for how to create the classroom environment.
 

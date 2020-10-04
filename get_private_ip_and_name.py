@@ -2,16 +2,26 @@
 
 import boto3
 import re
+from configparser import ConfigParser
+
+cfg = ConfigParser()
+cfg.read('yak_shaving.conf')
+
+pem = cfg.get('aws', 'your_pem')
+your_workshop_name = cfg.get('workshop', 'workshop_name')
+workshop_hostname_root = cfg.get('workshop', 'workshop_hostname_root')
+
+# hosts will be generated as: cp1.somedomain.com
 
 ec2 = boto3.client('ec2')
 host_pattern = re.compile(r'ksqldb|c3')
-bert_filters = [
-    {'Name': 'tag:workshop', 'Values': ['dsd']},
-    {'Name': 'key-name', 'Values': ['bert_confluent_aws_key.pem']},
+workshop_filters = [
+    {'Name': 'tag:workshop', 'Values': [your_workshop_name]},
+    {'Name': 'key-name', 'Values': [pem]},
     {'Name': 'instance-state-name', 'Values': ['running']}
 ]
 
-response = ec2.describe_instances(Filters=bert_filters)
+response = ec2.describe_instances(Filters=workshop_filters)
 
 # response is a dictionary
 # response['Reservations'] is a list
@@ -46,6 +56,6 @@ for dict in Reservations:
                     wh = workshop_hostname.split("-")
                     wh_hostname = wh[0]
                     if re.match(r'c3', wh_hostname):
-                        wh_hostname = 'netcom'
+                        wh_hostname = workshop_hostname_root
                     wh_number = wh[1]
         print(workshop_host, workshop_hostname, private_ip, public_ip, wh_hostname + wh_number)
