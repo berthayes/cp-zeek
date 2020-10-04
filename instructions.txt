@@ -71,15 +71,14 @@ for i in `cat all_nodes.txt`; do ssh -oStrictHostKeyChecking=no -i your_aws.pem 
 ./rc.sh a "sudo apt-get update && sudo apt-get upgrade -y"
 # This will take a little while.
 
-./rc.sh a "sudo reboot"
 
 # 7. create DNS records for hosts in Route 53
+
 cat aws_host_info.txt | awk {'print $2, $4'} > dns_script_hosts.txt
 
-
 python3 name_a_host.py
-# By default reads dns_script_hosts.txt
 
+# By default reads dns_script_hosts.txt
 
 
 # 8. Run a script to name the hostname on each host
@@ -96,6 +95,8 @@ python3 name_a_host.py
 
 ./rc.sh a "sudo reboot"
 
+sleep 90
+
 # 10. Install openjdk and other packages as required
 
 ./rc.sh a "sudo apt-get install -y openjdk-11-jdk docker docker-compose"
@@ -105,7 +106,7 @@ python3 name_a_host.py
 ./rc.sh a "sudo usermod -a -G docker ubuntu"
 
 # 11. Get the GitHub repo on each host
-./rc.sh a "git clone https://github.com/berthayes/cp-zeek
+./rc.sh a "git clone https://github.com/berthayes/cp-zeek"
 
 # 12. Run shell script to edit the docker-compose.yml file to reflect hostname
 ./rc.sh a "chmod 755 ~/cp-zeek/edit-docker-compose.sh"
@@ -126,3 +127,4 @@ python3 name_a_host.py
 # Note that the zeek-streamer Docker image starts reading the zeek-streamer.pcap file automatically
 ./rc.sh a "docker exec -d zeek-streamer /usr/bin/tcpreplay --loop=1000000000 -i dummy0 /pcaps/some_other.pcap"
 
+# TODO: automate deletion of DNS records when workshop is over - this is currently a manual process via Route 53 console.
