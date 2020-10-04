@@ -55,6 +55,9 @@ cat aws_host_info.txt | awk {'print $3'} > all_nodes.txt
 
 cat aws_host_info.txt | awk {'print $4'} > all_nodes.txt
 
+# These shell scripts are used for copying files to each host, and/or running commands on each host.
+# Edit them so that $key points to the correct AWS ssh pem file.
+
 chmod 755 rscp.sh
 chmod 755 rc.sh
 
@@ -74,8 +77,7 @@ for i in `cat all_nodes.txt`; do ssh -oStrictHostKeyChecking=no -i your_aws.pem 
 cat aws_host_info.txt | awk {'print $2, $4'} > dns_script_hosts.txt
 
 
-chmod 755 name_a_host.py
-./name_a_host.py
+python3 name_a_host.py
 # By default reads dns_script_hosts.txt
 
 
