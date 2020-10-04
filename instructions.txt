@@ -85,6 +85,8 @@ python3 name_a_host.py
 # 8. Run a script to name the hostname on each host
 # This is done so that hostname matches DNS (set later) and brokers et al are happy
 # Be sure to edit this file re: $public_ip or $private_ip for the SSH commands
+# Also specify the correct ssh key file
+
 ./hostname_changer.sh
 
 # 9.         Turn off ipv6 because it's a PITA
@@ -115,10 +117,12 @@ python3 name_a_host.py
 
 # Need to restart Docker?
 ./rc.sh a "sudo systemctl enable docker"
-#sudo systemctl start docker
-./rc.sh a "sudo reboot"
 
-# 9. Copy a juicy pcap to cp-zeek/pcaps/
+
+#sudo systemctl start docker
+
+# 14. (Optional) Copy a juicy pcap to cp-zeek/pcaps/
 # Start reading the pcap and loop for a bzillion times
+# Note that the zeek-streamer Docker image starts reading the zeek-streamer.pcap file automatically
 ./rc.sh a "docker exec -d zeek-streamer /usr/bin/tcpreplay --loop=1000000000 -i dummy0 /pcaps/some_other.pcap"
 
