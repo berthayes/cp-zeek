@@ -14,6 +14,8 @@
 ## Edit the config file
 Edit the config file yak_shaving.conf to reflect your AWS environment
 
+`vim yak_shaving.conf`
+
 Make sure to change these fields in the [aws] section:
 ```
 vm_name = Name_tag_in_AWS
@@ -30,9 +32,7 @@ workshop_domain = yourdomain.com
 HostedZoneId = route53_hosted_zone_id
 ```
 
-`vim yak_shaving.conf`
-
-Optional (recommended) - edit the create_aws_instances.py script to specify how many EC2 instances you want created.  Ideally, 1 per student.
+Optional (recommended) - edit the create_aws_instances.py script to specify how many EC2 instances you want created.  Ideally, 1 per student.  By default, the script creates 3 instances.
 
 `vim create_aws_instances.py`
 
@@ -54,13 +54,13 @@ These will be used to centrally manage each host via scripts.
 ## Create host lists
 This repo contains a few shell scripts that run a ```for i in `cat hosts.txt`; do``` 
 kind of loops.  These are designed to distribute files and run commands
-remotely
+remotely on multiple flavors of nodes (in this case, all nodes) using a BASH trick to run each command on each host at the same time, instead of run on one host, then the next,etc.
 
-If your central control node is in AWS in the same VPC, run this command:
+If your central control node is in AWS in the same VPC, run this command (uses private IP space for hosts):
 
 `cat aws_host_info.txt | awk {'print $3'} > all_nodes.txt`
 
-If your central control node is NOT in AWS network space (e.g. your laptop), run this command:
+If your central control node is NOT in AWS network space (e.g. your laptop), run this command (uses public IP space for hosts):
 
 `cat aws_host_info.txt | awk {'print $4'} > all_nodes.txt`
 
@@ -68,9 +68,10 @@ These shell scripts are used for copying files to each host, and/or running comm
 Edit them so that $key points to the correct AWS ssh pem file.
 
 `chmod 755 rscp.sh`
+
 `chmod 755 rc.sh`
 
-ssh connect to each host to get rid of banner warnings
+SSH to each host to get rid of banner warnings
 
 ```for i in `cat all_nodes.txt`; do ssh -oStrictHostKeyChecking=no -i your_aws.pem ubuntu@$i ls; done```
 
@@ -80,6 +81,7 @@ Optional (recommended) run `apt-get update` and `apt-get upgrade`
 May as well be on the latest software and avoid any bugs.
 
 ```./rc.sh a "sudo apt-get update && sudo apt-get upgrade -y"```
+
 This will take a little while.
 
 
@@ -89,7 +91,7 @@ This will take a little while.
 
 `python3 name_a_host.py`
 
-By default this script reads dns_script_hosts.txt
+By default this script reads the `dns_script_hosts.txt` file.
 
 
 Run a script to name the hostname on each host
@@ -102,7 +104,9 @@ Also specify the correct ssh key file
 ## Turn off ipv6 because it's a PITA
 
 `./rscp.sh a grub`
+
 `./rc.sh a "sudo cp grub /etc/default/grub"`
+
 `./rc.sh a "sudo update-grub"`
 
 `./rc.sh a "sudo reboot"`
@@ -117,6 +121,7 @@ Maybe remind yourself how long it takes an EC2 instance to reboot..
 
 
 Add the ubuntu user to the docker group
+
 `./rc.sh a "sudo usermod -a -G docker ubuntu"`
 
 ## Get the GitHub repo on each host
@@ -144,6 +149,7 @@ Helpful if you need to restart Docker:
 (Optional) Copy a juicy pcap to cp-zeek/pcaps/
 Start reading the pcap and loop for a bzillion times
 Note that the zeek-streamer Docker image starts reading the zeek-streamer.pcap file automatically
+
 `./rc.sh a "docker exec -d zeek-streamer /usr/bin/tcpreplay --loop=1000000000 -i dummy0 /pcaps/some_other.pcap"`
 
 TODO: automate deletion of DNS records when workshop is over - this is currently a manual process via Route 53 console.
