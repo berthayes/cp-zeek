@@ -4,7 +4,8 @@
 
  ## git clone the repo
  Do this on one host (e.g. your laptop or other EC2 host), then distribute it to additional EC2 hosts later on
-git clone https://github.com/berthayes/cp-zeek.git
+
+`git clone https://github.com/berthayes/cp-zeek.git`
 
  Got it?  Get in there!
 
