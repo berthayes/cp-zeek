@@ -85,6 +85,15 @@ services:
       CONNECT_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
       CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
       CONNECT_LOG4J_LOGGERS: org.apache.zookeeper=ERROR,org.I0Itec.zkclient=ERROR,org.reflections=ERROR
+    command:
+      - bash
+      - -c
+      - |
+        echo "Installing connector plugins"
+        confluent-hub install --no-prompt jcustenborder/kafka-connect-spooldir:latest
+        confluent-hub install --no-prompt confluentinc/kafka-connect-syslog:latest
+        echo "Launching Kafka Connect worker"
+        /etc/confluent/docker/run
 
   control-center:
     image: confluentinc/cp-enterprise-control-center:5.5.1
