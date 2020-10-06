@@ -1,6 +1,8 @@
  These instructions are for creating any number of EC2 hosts running Confluent Platform and ksqlDB
 
  The various scripts assume that the boto3 library can find your .aws/config and .aws/credentials files (in ~/ by default)
+ 
+ The scripts are meant to be run from a single controller node (e.g. your laptop/workstation or an EC2 host in the same VPC), which then spins up EC2 instances and runs commands remotely via SSH.
 
  Admittedly, this is pretty stone-age. There are probably easier ways to do this, but I didn't have time to learn Ansible when I wrote this.
 
@@ -53,6 +55,10 @@ This will retrieve the public and private IP addresses for each host
 These will be used to centrally manage each host via scripts.
 
 `./get_private_ip_and_name.py > aws_host_info.txt`
+
+Take a look at the `aws_host_info.txt` file just for a sanity check.
+
+`cat aws_host_info.txt`
 
 ## Create host lists
 This repo contains a few shell scripts that run a ```for i in `cat hosts.txt`; do``` 

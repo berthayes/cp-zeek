@@ -3,9 +3,9 @@
 # This script changes the hostname for each host spun up for the workshop
 
 file='aws_host_info.txt'
-key='path_to_aws_keypem.pem'
+key='aws_keypem.pem'
 conf_file='yak_shaving.conf'
-workshop_hostname_root=$(cat $conf_file | grep workshop_hostname_root | awk {'print $3'})
+workshop_hostname_root=$(cat $conf_file | grep workshop_hostname_root | awk -F= {'print $2'})
 #echo $workshop_hostname_root
 
 while IFS= read -r line; do
