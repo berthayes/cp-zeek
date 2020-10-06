@@ -1,7 +1,7 @@
 #!/bin/sh
 
 
-key="/home/ubuntu/.ssh/id_rsa"
+key="aws_key.pem"
 
 
 if [ $1 = "c" ]; then

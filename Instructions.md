@@ -2,6 +2,9 @@
 
  The various scripts assume that the boto3 library can find your .aws/config and .aws/credentials files (in ~/ by default)
 
+ Admittedly, this is pretty stone-age. There are probably easier ways to do this, but I didn't have time to learn Ansible when I wrote this.
+
+
  ## git clone the repo
  Do this on one host (e.g. your laptop or other EC2 host), then distribute it to additional EC2 hosts later on
 
@@ -124,31 +127,42 @@ Add the ubuntu user to the docker group
 
 `./rc.sh a "sudo usermod -a -G docker ubuntu"`
 
-## Get the GitHub repo on each host
+## Get the GitHub repo on each host & copy config
 `./rc.sh a "git clone https://github.com/berthayes/cp-zeek"`
 
+`./rscp.sh a yak_shaving.conf /home/ubuntu/cp-zeek/`
+
 ## Change docker-compose
-Run shell script to edit the docker-compose.yml file to reflect hostname
+Run shell script to edit the docker-compose.yml file to reflect hostname; also optionally change ports for ksqldb-server and Control Center.
+
+Take a look at the `edit-docker-compose.sh` script before you run it.  By default it moves Confluent Control Center from port 9021 to port 80, and ksqlDB from port 8088 to 443 (plaintext).
+
+`vim edit-docker-compose.sh`
 
 `./rc.sh a "chmod 755 ~/cp-zeek/edit-docker-compose.sh"`
 
 `./rc.sh a "sudo /bin/hostname | xargs ~/cp-zeek/edit-docker-compose.sh"`
 
+## Using your own PCAP file
+(Optional) Copy your own pcap to `cp-zeek/pcaps/zeek-streamer.pcap`
+
+The zeek-streamer Docker image begins reading the zeek-streamer.pcap file automatically at startup.
 
 ## Start docker
-`./rc.sh a "docker-compose -f /home/ubuntu/cp-zeek/docker-compose.yml up -d"`
+`./rc.sh a "docker-compose -f /home/ubuntu/cp-zeek/workshop-docker-compose.yml up -d"`
 
 Helpful if you need to restart Docker:
 
 `./rc.sh a "sudo systemctl enable docker"`
 
-
 `sudo systemctl start docker`
 
-## Using your own PCAP file
-(Optional) Copy a juicy pcap to cp-zeek/pcaps/
+## Read Additional PCAP
+If you have another pcap file you'd like to read simultaneously, copy it to the `cp-zeek/pcaps` directory
+
+`cp some_other.pcap cp-zeek/pcaps/`
+
 Start reading the pcap and loop for a bzillion times
-Note that the zeek-streamer Docker image starts reading the zeek-streamer.pcap file automatically
 
 `./rc.sh a "docker exec -d zeek-streamer /usr/bin/tcpreplay --loop=1000000000 -i dummy0 /pcaps/some_other.pcap"`
 
