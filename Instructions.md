@@ -110,6 +110,11 @@ Also specify the correct ssh key file
 
 `./hostname_changer.sh`
 
+Good idea: run a sanity check to make sure each host has had its hostname changed.
+
+`./rc.sh a hostname`
+
+
 ## Turn off ipv6 because it's a PITA
 
 `./rscp.sh a grub`
@@ -136,7 +141,9 @@ Add the ubuntu user to the docker group
 ## Get the GitHub repo on each host & copy config
 `./rc.sh a "git clone https://github.com/berthayes/cp-zeek"`
 
-`./rscp.sh a yak_shaving.conf /home/ubuntu/cp-zeek/`
+`./rscp.sh a yak_shaving.conf`
+
+`./rc.sh a "mv ~/yak_shaving.conf ~/cp-zeek/yak_shaving.conf"`
 
 ## Change docker-compose
 Run shell script to edit the docker-compose.yml file to reflect hostname; also optionally change ports for ksqldb-server and Control Center.
@@ -147,7 +154,11 @@ Take a look at the `edit-docker-compose.sh` script before you run it.  By defaul
 
 `./rc.sh a "chmod 755 ~/cp-zeek/edit-docker-compose.sh"`
 
-`./rc.sh a "sudo /bin/hostname | xargs ~/cp-zeek/edit-docker-compose.sh"`
+`./rc.sh a "/bin/hostname | xargs ~/cp-zeek/edit-docker-compose.sh"`
+
+Sanity check (recommended): Check for the presence of `workshop-docker-compose.yml` on remote systems.
+
+`./rc.sh a "ls -al ~/cp-zeek/workshop-docker-compose.yml"`
 
 ## Using your own PCAP file
 (Optional) Copy your own pcap to `cp-zeek/pcaps/zeek-streamer.pcap`
