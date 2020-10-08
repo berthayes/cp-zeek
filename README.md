@@ -1,27 +1,18 @@
 # Streaming Zeek Events with Apache Kafka and ksqlDB
+This repository is a customization based on the Quick Start for Apache Kafka Using Confluent Platform (Docker) documentation available here: https://docs.confluent.io/current/quickstart/ce-docker-quickstart.html It focuses on analyzing Zeek data with [ksqlDB](https://ksqldb.io) running on the Confluent Platform for Apache Kafka.
 
-This workshop is a customization based on the Quick Start for Apache Kafka Using Confluent Platform (Docker) documentation available here: https://docs.confluent.io/current/quickstart/ce-docker-quickstart.html
+You can clone/download this repo and run it as a single user by simply running `docker-compose up -d` or see the [Instructions.md](https://github.com/berthayes/cp-zeek/blob/master/Instructions.md) page for how to run this same environment on dozens of EC2 instances for an instructor-led workshop.
 
-This repository is for creating a classroom environment for a ksqlDB workshop.
-The python scripts use boto3 to talk to the AWS API for automating provisioning, and the shell scripts manage the hosts once they're running.
+### Set Up the Environment
 
-Admittedly, this is pretty stone-age.  There are probably easier ways to do this, but I didn't have time to learn Ansible when I wrote this.
+This environment leverages an additional Docker image: [bertisondocker/zeek-tcpreplay-kafka](https://github.com/berthayes/zeek-tcpreplay-kafka) for generating [Zeek](https://zeek.org) data to stream to Apache Kafka in real time.  When the image runs, tcpreplay automatically starts reading `./pcaps/zeek-streamer.pcap`
 
-### Recommended Reading
+To run this with the included packet capture simply run: 
+`docker-compose up -d`
 
+To analyze your own packet capture, Copy your pcap file to `./cp-zeek/pcaps/zeek-streamer.pcap` The zeek-streamer Docker image begins reading the zeek-streamer.pcap file automatically at startup.
 
-
-You might want the ksqlDB syntax reference to be handy:
-https://docs.ksqldb.io/en/latest/developer-guide/syntax-reference/
-
-
-### Set Up Demo Environment
-
-Check the instructions.txt for how to create the classroom environment.
-
-This workshop leverages an additional Docker image: [bertisondocker/zeek-tcpreplay-kafka](https://github.com/berthayes/zeek-tcpreplay-kafka) for generating [Zeek](https://zeek.org) data to stream to Apache Kafka in real time. 
-
-The pcap we're using in this workshop is available here:
+A super-fun pcap for analysis is available here:
 https://drive.google.com/open?id=1wMCm_ByWlkI4Zym_Stim-xUK4Zb4Zm5Q
 
 It's around 1GB in size and was originally captured over an hour or so.  The local network is 192.168.1.0/24 and there are maybe a dozen or so hosts that are active.  Some hosts are more active than others, and some hosts’ activities are more interesting than others.

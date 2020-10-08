@@ -1,18 +1,23 @@
- These instructions are for creating any number of EC2 hosts running Confluent Platform and ksqlDB
+# Running Multiple Instances for an Instructor Led Workshop
 
- The various scripts assume that the boto3 library can find your .aws/config and .aws/credentials files (in ~/ by default)
+This workshop is a customization based on the Quick Start for Apache Kafka Using Confluent Platform (Docker) documentation available here: https://docs.confluent.io/current/quickstart/ce-docker-quickstart.html
+
+These instructions are for creating a classroom environment for a ksqlDB workshop.
+The python scripts use boto3 to talk to the AWS API for automating provisioning, and the shell scripts manage the hosts once they're running.
+
+The various scripts assume that the boto3 library can find your .aws/config and .aws/credentials files (in ~/ by default)
  
- The scripts are meant to be run from a single controller node (e.g. your laptop/workstation or an EC2 host in the same VPC), which then spins up EC2 instances and runs commands remotely via SSH.
+The scripts are meant to be run from a single controller node (e.g. your laptop/workstation or an EC2 host in the same VPC), which then spins up EC2 instances and runs commands remotely via SSH.
 
- Admittedly, this is pretty stone-age. There are probably easier ways to do this, but I didn't have time to learn Ansible when I wrote this.
+Admittedly, this is pretty stone-age. There are probably easier ways to do this, but I didn't have time to learn Ansible when I wrote this.
 
 
- ## git clone the repo
- Do this on one host (e.g. your laptop or other EC2 host), then distribute it to additional EC2 hosts later on
+## git clone the repo
+Do this on one host (e.g. your laptop or other EC2 host), then distribute it to additional EC2 hosts later on
 
 `git clone https://github.com/berthayes/cp-zeek.git`
 
- Got it?  Get in there!
+Got it?  Get in there!
 
 `cd cp-zeek`
 
