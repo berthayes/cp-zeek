@@ -1,5 +1,5 @@
 # Streaming Zeek Events with Apache Kafka and ksqlDB
-This repository is a customization based on the Quick Start for Apache Kafka Using Confluent Platform (Docker) documentation available here: https://docs.confluent.io/current/quickstart/ce-docker-quickstart.html It focuses on analyzing Zeek data with [ksqlDB](https://ksqldb.io) running on the Confluent Platform for Apache Kafka.
+This repository is a customization based on the Quick Start for Apache Kafka Using Confluent Platform (Docker) documentation available here: https://docs.confluent.io/current/quickstart/ce-docker-quickstart.html It focuses on analyzing [Zeek](https://zeek.org) data with [ksqlDB](https://ksqldb.io) running on the Confluent Platform for Apache Kafka.
 
 You can clone/download this repo and run it as a single user by simply running `docker-compose up -d` or see the [Instructions.md](https://github.com/berthayes/cp-zeek/blob/master/Instructions.md) page for how to run this same environment on dozens of EC2 instances for an instructor-led workshop.
 
