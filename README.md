@@ -1,11 +1,27 @@
 # Streaming Zeek Events with Apache Kafka and ksqlDB
+
+## Quickstart
+**TL;DR?**
+
+``` 
+git clone https://github.com/berthayes/cp-zeek
+cd cp-zeek
+docker-compose up -d
+```
+Wait about 5 minutes or so for everything to start up, then point your web browser to http://localhost:9021
+
+## Custom Start
+
 This repository is a customization based on the Quick Start for Apache Kafka Using Confluent Platform (Docker) documentation available here: https://docs.confluent.io/current/quickstart/ce-docker-quickstart.html It focuses on analyzing [Zeek](https://zeek.org) data with [ksqlDB](https://ksqldb.io) running on the Confluent Platform for Apache Kafka.
 
-You can clone/download this repo and run it as a single user by simply running `docker-compose up -d` or see the [Instructions.md](https://github.com/berthayes/cp-zeek/blob/master/Instructions.md) page for how to run this same environment on dozens of EC2 instances for an instructor-led workshop.
 
-### Set Up the Environment
+See the Quickstart above to get up and running on your laptop/workstation with the default configs and packet captures.
 
-This environment leverages an additional Docker image: [bertisondocker/zeek-tcpreplay-kafka](https://github.com/berthayes/zeek-tcpreplay-kafka) for generating [Zeek](https://zeek.org) data to stream to Apache Kafka in real time.  When the image runs, tcpreplay automatically starts reading `./pcaps/zeek-streamer.pcap`
+See [Instructions.md](https://github.com/berthayes/cp-zeek/blob/master/Instructions.md) page for how to run this same environment on dozens of EC2 instances for an instructor-led workshop.
+
+### Customize Your Environment
+
+This docker-compose.yml leverages an additional Docker image: [bertisondocker/zeek-tcpreplay-kafka](https://github.com/berthayes/zeek-tcpreplay-kafka) for generating [Zeek](https://zeek.org) data to stream to Apache Kafka in real time.  When the image runs, tcpreplay automatically starts reading `./pcaps/zeek-streamer.pcap`
 
 To run this with the included packet capture simply run: 
 `docker-compose up -d`
@@ -17,7 +33,7 @@ https://drive.google.com/open?id=1wMCm_ByWlkI4Zym_Stim-xUK4Zb4Zm5Q
 
 It's around 1GB in size and was originally captured over an hour or so.  The local network is 192.168.1.0/24 and there are maybe a dozen or so hosts that are active.  Some hosts are more active than others, and some hosts’ activities are more interesting than others.
 
-One of the running Docker images is responsible for reading the alternate pcap and sending events from Zeek to Apache Kafka.  This image starts sending data automatically at start time, and the Apache Kafka broker is configured to create topics automatically when it receives them.  As soon as the environment is up and running, events are streaming into Kafka.
+The Apache Kafka broker is configured to create topics automatically when it receives events.  As soon as the environment is up and running, events are streaming into Kafka with separate topics created for each flavor of Zeek logs.
 
 ## Start Processing Data with Apache Kafka & ksqlDB
 
