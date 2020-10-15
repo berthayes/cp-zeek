@@ -96,7 +96,7 @@ services:
         confluent-hub install --no-prompt confluentinc/kafka-connect-syslog:latest
         echo "Launching Kafka Connect worker"
         /etc/confluent/docker/run
-        /tmp/start-syslog-connector.sh
+        /tmp/start_syslog_connector.sh
 
   control-center:
     image: confluentinc/cp-enterprise-control-center:5.5.1
