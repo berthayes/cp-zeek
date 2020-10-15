@@ -308,5 +308,38 @@ on s.SUBJECT = x."certificate.subject"
 WHERE (UNIX_TIMESTAMP() - (x."certificate.not_valid_before") * 1000) < 2592000000 EMIT CHANGES;
 ```
 
+## Analyzing Syslog Events
 
+The connect image has the [Confluent syslog connector](https://www.confluent.io/hub/confluentinc/kafka-connect-syslog) installed.  A connect worker can be configured by running:
+
+```docker exec -it connect /tmp/start_syslog_connector.sh```
+
+Alternatively, you can configure a connect worker through the Confluent Control Center GUI.
+
+### Create a stream from syslog data
+ksqlDB can't analyze raw records in a topic, it analyzes this data when its materialized as a stream.
+
+Create a stream from the syslog data with the following ksqlDB query:
+
+```sql
+CREATE STREAM SYSLOG_STREAM WITH (KAFKA_TOPIC='syslog', VALUE_FORMAT='AVRO');
+```
+
+The `tag` field in the syslog data represents the process that generated the log, e.g. `cron`, `sshd`, etc.
+
+This ksql query looks for more than 10 failed SSH logins in 5 seconds on a host:
+
+```sql
+SELECT WINDOWSTART AS starttime, 
+WINDOWEND AS endtime, 
+HOST, 
+TAG, 
+MESSAGE, 
+COUNT(*) AS COUNT_OF_INVALID_SSH 
+FROM SYSLOG_STREAM WINDOW TUMBLING (SIZE 5 SECONDS) 
+WHERE TAG='sshd' AND MESSAGE LIKE 'Connection closed by invalid user%' 
+GROUP BY HOST, TAG, MESSAGE
+HAVING COUNT(*) > 10
+EMIT CHANGES;
+```
 
