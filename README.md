@@ -8,6 +8,11 @@ git clone https://github.com/berthayes/cp-zeek
 cd cp-zeek
 docker-compose up -d
 ```
+If you also want to analyze streaming Syslog data, run:
+
+```
+./start_syslog_connector.sh
+```
 Wait about 5 minutes or so for everything to start up, then point your web browser to http://localhost:9021
 
 ## Custom Start
@@ -310,7 +315,7 @@ WHERE (UNIX_TIMESTAMP() - (x."certificate.not_valid_before") * 1000) < 259200000
 
 ## Analyzing Syslog Events
 
-The connect image has the [Confluent syslog connector](https://www.confluent.io/hub/confluentinc/kafka-connect-syslog) installed.  A connect worker can be configured by running:
+The running connect image has the [Confluent syslog connector](https://www.confluent.io/hub/confluentinc/kafka-connect-syslog) installed.  A connect worker can be configured by running:
 
 ```docker exec -it connect /tmp/start_syslog_connector.sh```
 
@@ -326,6 +331,18 @@ CREATE STREAM SYSLOG_STREAM WITH (KAFKA_TOPIC='syslog', VALUE_FORMAT='AVRO');
 ```
 
 The `tag` field in the syslog data represents the process that generated the log, e.g. `cron`, `sshd`, etc.
+
+This ksql query uses `REGEXP_EXTRACT` to extract the usernames and remote ip addresses that failed SSH logins:
+
+```sql
+SELECT TIMESTAMP, 
+TAG, MESSAGE, HOST, REMOTEADDRESS AS DEST_IP,
+TIMESTAMPTOSTRING(TIMESTAMP, 'yyyy-MM-dd HH:mm:ss') AS EVENT_TIME, 
+REGEXP_EXTRACT('Invalid user (.*) from', MESSAGE, 1) AS USER,
+REGEXP_EXTRACT('Invalid user .* from (.*) port', MESSAGE, 1) AS SRC_IP
+FROM  SYSLOG_STREAM WHERE TAG='sshd' AND MESSAGE LIKE 'Invalid user%' 
+EMIT CHANGES;
+```
 
 This ksql query looks for more than 10 failed SSH logins in 5 seconds on a host:
 
