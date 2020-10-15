@@ -85,6 +85,8 @@ services:
       CONNECT_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
       CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
       CONNECT_LOG4J_LOGGERS: org.apache.zookeeper=ERROR,org.I0Itec.zkclient=ERROR,org.reflections=ERROR
+    volumes:
+      - ${PWD}/start_syslog_connector.sh:/tmp/start_syslog_connector.sh
     command:
       - bash
       - -c
@@ -94,6 +96,7 @@ services:
         confluent-hub install --no-prompt confluentinc/kafka-connect-syslog:latest
         echo "Launching Kafka Connect worker"
         /etc/confluent/docker/run
+        /tmp/start-syslog-connector.sh
 
   control-center:
     image: confluentinc/cp-enterprise-control-center:5.5.1
@@ -179,6 +182,10 @@ services:
     container_name: zeek-streamer
     depends_on:
       - broker
+      - connect
+      - rest-proxy
+      - control-center
+      - ksqldb-server
     hostname: zeek-streamer
     entrypoint: /init_dummy.sh
     volumes:
