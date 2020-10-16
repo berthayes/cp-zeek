@@ -84,6 +84,9 @@ services:
       CONNECT_LOG4J_LOGGERS: org.apache.zookeeper=ERROR,org.I0Itec.zkclient=ERROR,org.reflections=ERROR
     volumes:
       - ${PWD}/start_syslog_connector.sh:/tmp/start_syslog_connector.sh
+      - ${PWD}/spooldir/csv_input/:/var/spooldir/csv_input/
+      - ${PWD}/spooldir/csv_finished/:/var/spooldir/csv_finished/
+      - ${PWD}/spooldir/csv_errors/:/var/spooldir/csv_errors/
     command:
       - bash
       - -c
