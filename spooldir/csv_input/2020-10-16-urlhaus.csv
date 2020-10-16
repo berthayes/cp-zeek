@@ -1,12 +1,4 @@
-################################################################
-# abuse.ch URLhaus Database Dump (CSV)                         #
-# Last updated: 2020-10-16 17:12:03 (UTC)                      #
-#                                                              #
-# Terms Of Use: https://urlhaus.abuse.ch/api/                  #
-# For questions please contact urlhaus [at] abuse.ch           #
-################################################################
-#
-# id,dateadded,url,url_status,threat,tags,urlhaus_link,reporter
+id,dateadded,url,url_status,threat,tags,urlhaus_link,reporter
 "702937","2020-10-16 17:12:03","http://123.11.8.69:40477/i","online","malware_download","32-bit,elf,mips","https://urlhaus.abuse.ch/url/702937/","geenensp"
 "702938","2020-10-16 17:12:03","http://178.141.56.167:42234/bin.sh","online","malware_download","32-bit,elf,mips","https://urlhaus.abuse.ch/url/702938/","geenensp"
 "702936","2020-10-16 17:12:03","http://206.126.81.100/PleaseSub_to_YouTube-VegaSec/0xVegak4t4n4.arm","online","malware_download","elf","https://urlhaus.abuse.ch/url/702936/","tolisec"
