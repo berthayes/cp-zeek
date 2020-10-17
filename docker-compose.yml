@@ -93,7 +93,7 @@ services:
         confluent-hub install --no-prompt jcustenborder/kafka-connect-spooldir:latest
         confluent-hub install --no-prompt confluentinc/kafka-connect-syslog:latest
         echo "Launching Kafka Connect worker"
-        /etc/confluent/docker/run &
+        /etc/confluent/docker/run 
         /tmp/start_syslog_connector.sh
 
   control-center:
