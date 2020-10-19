@@ -10,4 +10,4 @@ assigned_addr VARCHAR,
 lease_time INTEGER, 
 msg_types ARRAY<STRING>, 
 duration INTEGER)
-WITH (KAFKA_TOPIC='dhcp', VALUE_FORMAT='JSON', KEY='mac');
+WITH (KAFKA_TOPIC='dhcp', VALUE_FORMAT='JSON');
