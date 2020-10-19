@@ -137,17 +137,68 @@ SELECT * FROM INBOUND_STREAM EMIT CHANGES;
 
 Take a look at the ksqldb_scripts/ directory in the GitHub repository.  Copy the SQL code from `cp-zeek/ksqldb_scripts/create_bro_dns_stream.sql` into the ksqlDB editor and run the query.
 
-Congratulations!  You now have Zeek conn data AND Zeek DNS data as streams to analyze in ksqlDB.
+If you are running this environment in Docker on your local workstation/laptop, you can run the ksql command line interface by running:
 
 ```
+$ docker exec -it ksqldb-cli /usr/bin/ksql http://ksqldb-server:8088
+```
+```
+OpenJDK 64-Bit Server VM warning: Option UseConcMarkSweepGC was deprecated in version 9.0 and will likely be removed in a future release.
+                  
+                  ===========================================
+                  =       _              _ ____  ____       =
+                  =      | | _____  __ _| |  _ \| __ )      =
+                  =      | |/ / __|/ _` | | | | |  _ \      =
+                  =      |   <\__ \ (_| | | |_| | |_) |     =
+                  =      |_|\_\___/\__, |_|____/|____/      =
+                  =                   |_|                   =
+                  =  Event Streaming Database purpose-built =
+                  =        for stream processing apps       =
+                  ===========================================
+
+Copyright 2017-2020 Confluent Inc.
+
+CLI v6.0.0, Server v6.0.0 located at http://ksqldb-server:8088
+
+Having trouble? Type 'help' (case-insensitive) for a rundown of how things work!
+
+ksql>
+```
+ksql commands can be saved and run as scripts from this command line:
+
+```
+ksql> RUN SCRIPT /ksqldb_scripts/create_bro_dns_stream.sql;
+
+ Message        
+----------------
+ Stream created 
+----------------
+ksql> RUN SCRIPT /ksqldb_scripts/create_bro_ssl_stream.sql
+
+ Message        
+----------------
+ Stream created 
+----------------
+ksql> RUN SCRIPT /ksqldb_scripts/create_bro_x509_stream.sql
+
+ Message        
+----------------
+ Stream created 
+----------------
+ksql>
+```
+
+Congratulations!  You now have Zeek conn data AND Zeek DNS data as streams to analyze in ksqlDB.
+
+```sql
 SELECT "query", COUNT("query") AS LOOKUPS FROM DNS_STREAM GROUP BY "query" EMIT CHANGES;
 ```
 Take a look at an example of a DNS event as it is recorded by the Zeek connection logger:
-```
+```sql
 SELECT * FROM CONN_STREAM WHERE "id.resp_p"=53 AND PROTO='udp' EMIT CHANGES LIMIT 1;
 ```
 Now take a look at an example of a DNS event as it’s recorded by the Zeek DNS logger:
-```
+```sql
 SELECT * FROM DNS_STREAM WHERE "id.resp_p"=53 AND PROTO='udp' EMIT CHANGES LIMIT 1;
 ```
 Notice how the CONN_STREAM event has byte counts associated with the traffic, but not the DNS query or reply information?  And how the DNS_STREAM event has the DNS information, but not byte counts?
@@ -187,7 +238,7 @@ https://docs.ksqldb.io/en/latest/concepts/time-and-windows-in-ksqldb-queries/
 
 This query will count the number of hostnames queried (e.g. the “www” in www.example.org) by a specific IP address.  The query uses a Tumbling window of 5 minutes to keep a running tally:
 
-```
+```sql
 SELECT SRC_IP, HOSTNAME, COUNT(HOSTNAME) AS COUNT_HOSTNAME 
 FROM RICH_DNS WINDOW TUMBLING (SIZE 5 MINUTES) 
 GROUP BY SRC_IP, HOSTNAME EMIT CHANGES;
@@ -237,14 +288,14 @@ Create streams for SSL data and X509 data by copy/pasting the `cp-zeek/ksqldb_sc
 
 
 Take a look at a single SSL event:
-```
+```sql
 SELECT * FROM SSL_STREAM EMIT CHANGES LIMIT 1;
 ```
 Notice how the SSL event has IP and port information, as well as information about the Subject and Issuer of the certificate that was used.  We even get a field called ```VALIDATION_STATUS``` that helpfully indicates that a certificate has expired.  Missing, however, is more detailed information about the certificate itself.
 
 Looking at the X509 event, we see more detailed information about the certificate itself, including the creation and expiration dates in epoch form.
 
-```
+```sql
 SELECT * FROM X509_STREAM EMIT CHANGES LIMIT 1;
 ```
 
