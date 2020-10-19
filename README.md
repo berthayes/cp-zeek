@@ -395,10 +395,41 @@ REGEXP_EXTRACT('Invalid user .* from (.*) port', MESSAGE, 1) AS SRC_IP
 FROM  SYSLOG_STREAM WHERE TAG='sshd' AND MESSAGE LIKE 'Invalid user%' 
 EMIT CHANGES;
 ```
+This results in a record that looks like this:
+
+```json
+{
+  "TIMESTAMP": 1603040775000,
+  "TAG": "sshd",
+  "MESSAGE": "Invalid user ralphie from 192.168.1.183 port 56350",
+  "HOST": "deb9-LAN",
+  "DEST_IP": "172.18.1.9",
+  "EVENT_TIME": "2020-10-18 17:06:15",
+  "USER": "ralphie",
+  "SRC_IP": "192.168.1.183"
+}
+```
+The groomed data you get as a result of this queryi is ideal for downstream consumption.
 
 This ksql query looks for more than 10 failed SSH logins in 5 seconds on a host:
 
 ```sql
+SELECT WINDOWSTART AS starttime, 
+WINDOWEND AS endtime, 
+HOST, 
+TAG, 
+MESSAGE, 
+COUNT(*) AS COUNT_OF_INVALID_SSH 
+FROM SYSLOG_STREAM WINDOW TUMBLING (SIZE 5 SECONDS) 
+WHERE TAG='sshd' AND MESSAGE LIKE 'Connection closed by invalid user%' 
+GROUP BY HOST, TAG, MESSAGE
+HAVING COUNT(*) > 10
+EMIT CHANGES;
+```
+Season to taste, then create a table for this select query.  This table will create a new topic which can be fed downstream to a real-time alerting platform or a SIEM.
+
+```sql
+CREATE TABLE BRUTE_FORCE_SSH_TABLE WITH (KAFKA_TOPIC='bruteforce', VALUE_FORMAT='AVRO') AS
 SELECT WINDOWSTART AS starttime, 
 WINDOWEND AS endtime, 
 HOST, 
@@ -439,3 +470,54 @@ cp cp-zeek/ad_hosts.txt cp-zeek/spooldir/ad_hosts/csv_inupt
 Then start a new Spooldir connector to watch for this source:
 
 ```./start_adhosts_spooldir.sh```
+
+It's important to note that this script includes the line:
+```"schema.generation.enabled": true``` .  Automatic schema generation is a wonderful thing, but the connector requires a CSV waiting for it in order to start.  In other words, it needs a file to read to automatically generate the schema.  If the file is not there, the connector will fail.
+
+If you look under Topics, you should now see an topic called ad_hosts.
+
+Create a stream from this topic so that ksqlDB can process it:
+```sql
+CREATE STREAM ADHOSTS_STREAM (
+  dateadded VARCHAR,
+  domain VARCHAR,
+  source VARCHAR)
+WITH (KAFKA_TOPIC='ad_hosts', VALUE_FORMAT='AVRO');
+```
+Now re-key the stream so that the HOST value is the key.  This step is critical because streams and tables can only be joined if they have the same key.
+
+```sql
+CREATE STREAM KEYED_HOSTS AS
+SELECT CAST(DATEADDED AS BIGINT) AS DATEADDED, DOMAIN AS HOSTNAME, SOURCE
+FROM  ADHOSTS_STREAM
+PARTITION BY HOSTNAME
+EMIT CHANGES;
+```
+This query will result in a new topic called KEYED_HOSTS.
+
+Because joining a stream to a stream requires a time window, and we want to consider our list of bad hostnames as more of a static snapshot, we will create a table from this stream:
+
+```sql
+CREATE TABLE adverts (dateadded BIGINT, hostname VARCHAR PRIMARY KEY, source VARCHAR)
+WITH (KAFKA_TOPIC='KEYED_HOSTS', VALUE_FORMAT='AVRO');
+```
+
+So now we have a table against which we can match streaming events.
+
+So let's take the HTTP_STREAM and re-key it by host so it can be joined with this table:
+
+```sql
+CREATE STREAM KEYED_HTTP WITH (KAFKA_TOPIC='keyed_http')
+AS SELECT * FROM  HTTP_STREAM
+PARTITION BY HOST
+EMIT CHANGES;
+```
+
+Now create a NEW stream that joins the `KEYED_HTTP` with the `ADVERTS` table:
+
+```sql
+CREATE STREAM MATCHED_HOSTNAMES_ADVERTS WITH (KAFKA_TOPIC='matched_adhosts', PARTITIONS=1, REPLICAS=1)
+AS SELECT * FROM KEYED_HTTP
+INNER JOIN ADVERTS ADVERTS ON KEYED_HTTP.HOST = ADVERTS.HOSTNAME
+EMIT CHANGES;
+```
