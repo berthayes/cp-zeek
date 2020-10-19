@@ -286,6 +286,7 @@ It's often helpful to enrich IP information with this meta data at the data fabr
 
 Create streams for SSL data and X509 data by copy/pasting the `cp-zeek/ksqldb_scripts/create_bro_ssl_stream.sql` and `cp-zeek/ksqldb_scripts/create_bro_x509_stream.sql` into the ksqlDB editor in Confluent Control Center.
 
+Alternatively, use the ksql CLI to run the `create_bro_x509_stream.sql` script as shown above.
 
 Take a look at a single SSL event:
 ```sql
@@ -411,3 +412,30 @@ HAVING COUNT(*) > 10
 EMIT CHANGES;
 ```
 
+## Matching host and domain names
+
+A sample csv file of known Ad servers is in the `ad_hosts.txt` file included in this repository.
+
+It looks like this:
+
+```
+id,dateadded,domain,source
+1,1602886038,fr.a2dfp.net,https://winhelp2002.mvps.org/hosts.txt
+2,1602886038,mfr.a2dfp.net,https://winhelp2002.mvps.org/hosts.txt
+3,1602886038,ad.a8.net,https://winhelp2002.mvps.org/hosts.txt
+4,1602886038,asy.a8ww.net,https://winhelp2002.mvps.org/hosts.txt
+5,1602886038,static.a-ads.com,https://winhelp2002.mvps.org/hosts.txt
+6,1602886038,abcstats.com,https://winhelp2002.mvps.org/hosts.txt
+7,1602886038,track.acclaimnetwork.com,https://winhelp2002.mvps.org/hosts.txt
+8,1602886038,csh.actiondesk.com,https://winhelp2002.mvps.org/hosts.txt
+9,1602886038,ads.activepower.net,https://winhelp2002.mvps.org/hosts.txt
+```
+To ingest this CSV file into a ne topic and automatically create a schema for that topic, copy the `ad_hosts.txt` file into `cp-zeek/spooldir/ad_hosts/csv_inut/`
+
+```
+cp cp-zeek/ad_hosts.txt cp-zeek/spooldir/ad_hosts/csv_inupt
+```
+
+Then start a new Spooldir connector to watch for this source:
+
+```./start_adhosts_spooldir.sh```
