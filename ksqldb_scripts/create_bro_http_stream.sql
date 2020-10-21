@@ -20,5 +20,5 @@ tags ARRAY<STRING>,
 orig_fuids ARRAY<STRING>,
 orig_mime_types ARRAY<STRING>,
 resp_fuids ARRAY<STRING>,
-resp_mime_types ARRAY<STRING>) \
+resp_mime_types ARRAY<STRING>) 
 WITH (KAFKA_TOPIC='http', VALUE_FORMAT='JSON');
