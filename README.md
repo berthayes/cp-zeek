@@ -1,5 +1,5 @@
 # Streaming Zeek Events with Apache Kafka and ksqlDB
-[Custom Start](https://github.com/berthayes/cp-zeek/Custom-Start)
+[Custom Start](https://github.com/berthayes/cp-zeek/#Custom-Start)
 ## Quickstart
 - [Running on localhost](https://github.com/berthayes/cp-zeek/#Running-on-localhost)
 
