@@ -5,7 +5,7 @@
 
 - [Running on an external host](https://github.com/berthayes/cp-zeek/#Running-on-an-external-host)
 
-- [Running on a bunch of EC2 hosts in AWS](https://github.com/berthayes/cp-zeek/Workshop_Instructions.md)
+- [Running on a bunch of EC2 hosts in AWS](https://github.com/berthayes/cp-zeek/blob/master/Workshop_Instructions.md)
 
 [ksqlDB Walkthrough](ksqldb_walkthrough.md) - A guided walk through using ksqlDB to analyze Zeek and Syslog data.
 
