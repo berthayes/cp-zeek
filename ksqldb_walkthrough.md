@@ -5,13 +5,13 @@ This document is a step-by-step walkthrough that guides the reader through proce
 This table of contents is provided as a reference.  Please note that each section must be completed fully before the next section will work.
 
 ## Table of Contents
-- [Creating a Stream with Conn Data](https://github.com/berthayes/cp-zeek/README.md#Creating-a-Strea-with-Conn-Data)
-- [Creating a Stream with DNS Data](https://github.com/berthayes/cp-zeek/README.md#Creating-a-Strea-with-DNS-Data)
-- [Creating an Enriched Stream - Joining Streams](https://github.com/berthayes/cp-zeek/README.md#Creating-an-Enriched-Stream---Joining-Streams)
-- [Creating an Enriched Stream - User Defined Lookupes](https://github.com/berthayes/cp-zeek/README.md#creating-an-enriched-stream---user-defined-lookups)
-- [Looking at SSL Data](https://github.com/berthayes/cp-zeek/README.md#looking-at-ssl-data)
-- [Analyzing Syslog Events](https://github.com/berthayes/cp-zeek/blob/master/README.md#analyzing-syslog-events)
-- [Matching hostnames in a watchlist](https://github.com/berthayes/cp-zeek/README.md#Matching-hostnames-in-a-watchlist)
+- [Creating a Stream with Conn Data](https://github.com/berthayes/cp-zeek/blob/master/ksqldb_walkthrough.md#creating-a-stream-with-conn-data)
+- [Creating a Stream with DNS Data](https://github.com/berthayes/cp-zeek/blob/master/ksqldb_walkthrough.md#creating-a-stream-with-dns-data)
+- [Creating an Enriched Stream - Joining Streams](https://github.com/berthayes/cp-zeek/blob/master/ksqldb_walkthrough.md#creating-an-enriched-stream---joining-streams)
+- [Creating an Enriched Stream - User Defined Lookups](https://github.com/berthayes/cp-zeek/blob/master/ksqldb_walkthrough.md#creating-an-enriched-stream---user-defined-lookups)
+- [Looking at SSL Data](https://github.com/berthayes/cp-zeek/blob/master/ksqldb_walkthrough.md#looking-at-ssl-data)
+- [Analyzing Syslog Events](https://github.com/berthayes/cp-zeek/blob/master/ksqldb_walkthrough.md#analyzing-syslog-events)
+- [Matching hostnames in a watchlist](https://github.com/berthayes/cp-zeek/ksqldb_walkthrough.md#Matching-hostnames-in-a-watchlist)
 
 ### Creating a Stream with Conn Data
 
