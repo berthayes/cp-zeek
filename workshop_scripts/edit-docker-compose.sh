@@ -1,7 +1,9 @@
 #!/bin/bash
 # Dumb script to edit a template file and replace the ksqldb-server line
 
-WORKSHOP_DOMAIN=`cat /home/ubuntu/cp-zeek/yak_shaving.conf | grep workshop_domain | awk -F= {'print $2'} | tr -d '[:space:]'`
+conf_file="/home/ubuntu/cp-zeek/workshop_scripts/yak_shaving.conf"
+
+WORKSHOP_DOMAIN=`cat $conf_file | grep workshop_domain | awk -F= {'print $2'} | tr -d '[:space:]'`
 # This assumes that the domain name that the workshop runs in is managed by AWS Route 53
 
 
