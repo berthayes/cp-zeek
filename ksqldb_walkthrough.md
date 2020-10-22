@@ -460,7 +460,7 @@ Now re-key the stream so that the HOST value is the key.  This step is critical 
 CREATE STREAM KEYED_HOSTS AS
 SELECT CAST(DATEADDED AS BIGINT) AS DATEADDED, DOMAIN AS HOSTNAME, SOURCE
 FROM  ADHOSTS_STREAM
-PARTITION BY HOSTNAME
+PARTITION BY DOMAIN
 EMIT CHANGES;
 ```
 This query will result in a new topic called KEYED_HOSTS.
