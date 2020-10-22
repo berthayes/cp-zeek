@@ -1,11 +1,11 @@
 # Streaming Zeek Events with Apache Kafka and ksqlDB
-[Custom Start](https://github.com/berthayes/cp-zeek/README.md#Custom-Start)
+[Custom Start](https://github.com/berthayes/cp-zeek/README#Custom-Start)
 ## Quickstart
-- [Running on localhost](https://github.com/berthayes/cp-zeek/README.md#Running-on-localhost)
+- [Running on localhost](https://github.com/berthayes/cp-zeek/#Running-on-localhost)
 
-- [Running on an external host](https://github.com/berthayes/cp-zeek/README.md#Running-on-an-external-host)
+- [Running on an external host](https://github.com/berthayes/cp-zeek/#Running-on-an-external-host)
 
-- [Running on a bunch of EC2 hosts in AWS](https://github.com/berthayes/cp-zeek/README.md#Running-on-a-bunch-of-EC2-hosts-in-AWS)
+- [Running on a bunch of EC2 hosts in AWS](https://github.com/berthayes/cp-zeek/#Running-on-a-bunch-of-EC2-hosts-in-AWS)
 
 [ksqlDB Walkthrough](ksqldb_walkthrough.md) - A guided walk through using ksqlDB to analyze Zeek and Syslog data.
 
