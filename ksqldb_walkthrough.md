@@ -11,7 +11,7 @@ This table of contents is provided as a reference.  Please note that each sectio
 - [Creating an Enriched Stream - User Defined Lookups](https://github.com/berthayes/cp-zeek/blob/master/ksqldb_walkthrough.md#creating-an-enriched-stream---user-defined-lookups)
 - [Looking at SSL Data](https://github.com/berthayes/cp-zeek/blob/master/ksqldb_walkthrough.md#looking-at-ssl-data)
 - [Analyzing Syslog Events](https://github.com/berthayes/cp-zeek/blob/master/ksqldb_walkthrough.md#analyzing-syslog-events)
-- [Matching hostnames in a watchlist](https://github.com/berthayes/cp-zeek/ksqldb_walkthrough.md#Matching-hostnames-in-a-watchlist)
+- [Matching hostnames in a watchlist](https://github.com/berthayes/cp-zeek/blob/master/ksqldb_walkthrough.md#matching-hostnames-in-a-watchlist)
 
 ### Creating a Stream with Conn Data
 
