@@ -415,10 +415,12 @@ EMIT CHANGES;
 
 ## Matching hostnames in a watchlist
 
-A sample csv file of known Ad servers is in the `ad_hosts.txt` file included in this repository.
+A sample csv file of known Ad servers is in the `ad_hosts.csv` file included in this repository.
 
+```
+./cp-zeek/spooldir/ad_hosts/csv_input/ad_hosts.csv
+```
 It looks like this:
-
 ```
 id,dateadded,domain,source
 1,1602886038,fr.a2dfp.net,https://winhelp2002.mvps.org/hosts.txt
@@ -431,19 +433,14 @@ id,dateadded,domain,source
 8,1602886038,csh.actiondesk.com,https://winhelp2002.mvps.org/hosts.txt
 9,1602886038,ads.activepower.net,https://winhelp2002.mvps.org/hosts.txt
 ```
-To ingest this CSV file into a ne topic and automatically create a schema for that topic, copy the `ad_hosts.txt` file into `cp-zeek/spooldir/ad_hosts/csv_inut/`
-
+To ingest this CSV file into a ne topic and automatically create a schema for that topic, start a new Spooldir connector to watch for this source:
 ```
-cp cp-zeek/ad_hosts.txt cp-zeek/spooldir/ad_hosts/csv_inupt
+./start_adhosts_spooldir.sh
 ```
-
-Then start a new Spooldir connector to watch for this source:
-
-```./start_adhosts_spooldir.sh```
-
-It's important to note that this script includes the line:
-```"schema.generation.enabled": true``` .  Automatic schema generation is a wonderful thing, but the connector requires a CSV waiting for it in order to start.  In other words, it needs a file to read to automatically generate the schema.  If the file is not there, the connector will fail.
-
+Once this is started, or if it had already been started, the `ad_hosts.csv` file moves to:
+```
+./cp-zeek/spooldir/ad_hosts/csv_finished/ad_servers.csv
+```
 If you look under Topics, you should now see an topic called ad_hosts.
 
 Create a stream from this topic so that ksqlDB can process it:
@@ -490,4 +487,42 @@ CREATE STREAM MATCHED_HOSTNAMES_ADVERTS WITH (KAFKA_TOPIC='matched_adhosts', PAR
 AS SELECT * FROM KEYED_HTTP
 INNER JOIN ADVERTS ADVERTS ON KEYED_HTTP.HOST = ADVERTS.HOSTNAME
 EMIT CHANGES;
+```
+This kind of query won't help if the ad server is using HTTPS since the HOST header field would be encrypted.  So instead of matching on HTTP HOST field, match on DNS lookups for that hostname.
+
+Create a new DNS stream that has the `"query"` value for its key:
+```sql
+CREATE STREAM KEYED_DNS WITH (KAFKA_TOPIC='keyed_dns', PARTITIONS=1, REPLICAS=1)
+AS SELECT * FROM  DNS_STREAM
+PARTITION BY "query"
+EMIT CHANGES;
+```
+Now create a new stream with a join where the DNS query value matches an ad server hostname:
+```sql
+CREATE STREAM MATCHED_DOMAINS_DNS WITH (KAFKA_TOPIC='matched_dns', PARTITIONS=1, REPLICAS=1)
+AS SELECT * FROM KEYED_DNS
+INNER JOIN ADVERTS ADVERTS ON KEYED_DNS."query" = ADVERTS.HOSTNAME
+EMIT CHANGES;
+```
+This query creates a new stream `MATCHED_DOMAINS_DNS` that is backed by a new topic, `matched_dnsThis query doesn't really turn up much, which tells me that these hosts aren't beingThis kind of query won't help if the ad server is using HTTPS since the HOST header field would be encrypted.  matching on HTTP HOST field, match on DNS lookups for that hostname.
+
+Create a new DNS stream that has the `"query"` value for its key:
+```sql
+CREATE STREAM KEYED_DNS WITH (KAFKA_TOPIC='keyed_dns', PARTITIONS=1, REPLICAS=1)
+AS SELECT * FROM  DNS_STREAM
+PARTITION BY "query"
+EMIT CHANGES;
+```
+Now create a new stream with a join where the DNS query value matches an ad server hostname:
+```sql
+CREATE STREAM MATCHED_DOMAINS_DNS WITH (KAFKA_TOPIC='matched_dns', PARTITIONS=1, REPLICAS=1)
+AS SELECT * FROM KEYED_DNS
+INNER JOIN ADVERTS ADVERTS ON KEYED_DNS."query" = ADVERTS.HOSTNAME
+EMIT CHANGES;
+```
+This creates a new stream called `MATCHED_DOMAINS_DNS` which is backed by a new topic, `matched_dns`.
+
+You can look for all DNS lookups that match any host listed in the ad_hosts.csv file with the following query:
+```
+SELECT * FROM  MATCHED_DOMAINS_DNS EMIT CHANGES;
 ```

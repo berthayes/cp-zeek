@@ -30,6 +30,11 @@ To start the Spooldir connector that consumes a sample URLHaus watchlist, run:
 ./start_urlhaus_spooldir.sh
 ```
 
+To start the Spooldir connector that consumes a watchlist of ad servers, run:
+```
+./start_adhosts_spooldir.sh
+```
+
 ## Running on an external host
 To run this environment on a system that is not your laptop/workstation, edit the `docker-compose.yml` file.
 
@@ -58,9 +63,14 @@ To start the Spooldir connector that consumes a sample URLHaus watchlist, run:
 ./start_urlhaus_spooldir.sh
 ```
 
+To start the Spooldir connector that consumes a watchlist of ad servers, run:
+```
+./start_adhosts_spooldir.sh
+```
+
 ## Custom Start
 
-This repository is a customization based on the Quick Start for Apache Kafka Using Confluent Platform (Docker) documentation available here: https://docs.confluent.io/current/quickstart/ce-docker-quickstart.html It focuses on analyzing [Zeek](https://zeek.org) data with [ksqlDB](https://ksqldb.io) running on the Confluent Platform for Apache Kafka.
+This repository is a customization based on the Quick Start for Apache Kafka Using Confluent Platform (Docker) documentation available here: https://docs.confluent.io/current/quickstart/ce-docker-quickstart.html It focuses on analyzing [Zeek](https://zeek.org) and Syslog events with [ksqlDB](https://ksqldb.io) running on the Confluent Platform for Apache Kafka.
 
 
 ### Customize Your Environment
