@@ -5,6 +5,8 @@
 
 - [Running on an external host](https://github.com/berthayes/cp-zeek/#Running-on-an-external-host)
 
+- [Starting the Connectors](https://github.com/berthayes/cp-zeek/#Starting-the-Connectors)
+
 - [Running on a bunch of EC2 hosts in AWS](https://github.com/berthayes/cp-zeek/blob/master/Workshop_Instructions.md)
 
 [ksqlDB Walkthrough](ksqldb_walkthrough.md) - A guided walk through using ksqlDB to analyze Zeek and Syslog data.
@@ -19,21 +21,7 @@ docker-compose up -d
 
 Wait about 5 minutes or so for everything to start up, then point your web browser to http://localhost:9021
 
-If you also want to analyze streaming Syslog data, run:
-
-```
-./start_syslog_connector.sh
-```
-
-To start the Spooldir connector that consumes a sample URLHaus watchlist, run:
-```
-./start_urlhaus_spooldir.sh
-```
-
-To start the Spooldir connector that consumes a watchlist of ad servers, run:
-```
-./start_adhosts_spooldir.sh
-```
+To start the Syslog and Spooldir connectors, see: [Starting the Connectors](https://github.com/berthayes/cp-zeek/#Starting-the-Connectors) 
 
 ## Running on an external host
 To run this environment on a system that is not your laptop/workstation, edit the `docker-compose.yml` file.
@@ -52,20 +40,25 @@ docker-compose up -d
 ```
 Wait about 5 minutes or so for everything to start up, then point your web browser to http://yourhost.yourdomain.com:9021
 
+To start the Syslog and Spooldir connectors, see: [Starting the Connectors](https://github.com/berthayes/cp-zeek/#Starting-the-Connectors) 
+
+
+## Starting the Connectors
+
 If you also want to analyze streaming Syslog data, run:
 
 ```
-./start_syslog_connector.sh
+curl localhost:8083/connectors -X POST -H "Content-Type: application/json" -d @syslog_connect.json
 ```
 
 To start the Spooldir connector that consumes a sample URLHaus watchlist, run:
 ```
-./start_urlhaus_spooldir.sh
+curl localhost:8083/connectors -X POST -H "Content-Type: application/json" -d @urlhaus_spooldir.json
 ```
 
 To start the Spooldir connector that consumes a watchlist of ad servers, run:
 ```
-./start_adhosts_spooldir.sh
+curl localhost:8083/connectors -X POST -H "Content-Type: application/json" -d @adhosts_spooldir.json
 ```
 
 ## Custom Start
