@@ -1,0 +1,63 @@
+---
+- name: Kafka Provisioning
+  hosts: all
+  remote_user: root
+  gather_facts: false
+  tags: kafka_connect
+  tasks:
+    - name: apt-get update and upgrade
+      apt:
+        update_cache: yes
+        upgrade: full
+        force_apt_get: yes
+    - name: install java and docker
+      apt:
+        name: openjdk-11-jdk, jq, docker, docker-compose, python3, python3-pip
+        state: latest
+        force_apt_get: yes
+    - name: Git clone repository
+      git:
+        repo: 'https://github.com/berthayes/cp-zeek.git'
+        dest: /home/ubuntu/cp-zeek
+    - name: chown spooldir directories
+      shell:
+        cmd: chown -R ubuntu:ubuntu /home/ubuntu/cp-zeek/spooldir/
+    - name: Editing docker-compose.yml file
+      script:
+        cmd: edit-docker-compose.sh
+    - name: Starting Docker
+      shell:
+        cmd: docker-compose -f /home/ubuntu/cp-zeek/workshop-docker-compose.yml up -d
+    - name: Waiting a few minutes for software to finish spinning up
+      pause:
+        minutes: 3
+    - name: Starting syslog connector
+      uri:
+        url: http://localhost:8083/connectors
+        method: POST
+        src: /home/ubuntu/cp-zeek/syslog_connect.json
+        remote_src: yes
+        status_code: 201
+        headers:
+          Content-Type: application/json
+    - name: Starting Spooldir connector for ad_hosts.csv
+      uri:
+        url: http://localhost:8083/connectors
+        method: POST
+        src: /home/ubuntu/cp-zeek/adhosts_spooldir.json
+        remote_src: yes
+        status_code: 201
+        headers:
+          Content-Type: application/json
+    - name: Starting Spooldir connector for urlhaus csv data
+      uri:
+        url: http://localhost:8083/connectors
+        method: POST
+        src: /home/ubuntu/cp-zeek/urlhaus_spooldir.json
+        remote_src: yes
+        status_code: 201
+        headers:
+          Content-Type: application/json
+
+
+
