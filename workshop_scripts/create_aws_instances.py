@@ -37,7 +37,6 @@ cfg = ConfigParser()
 cfg.read(config_file)
 
 
-snapshot_id = cfg.get('aws', 'snapshot_id')
 security_group_id = cfg.get('aws', 'security_group_id')
 ami = cfg.get('aws', 'ami')
 InstanceType = cfg.get('aws', 'InstanceType')
@@ -62,7 +61,6 @@ def create_instance(host_job, iteration):
                 'DeviceName': '/dev/sda1',
                 'Ebs': {
                     'DeleteOnTermination': True,
-                    'SnapshotId': snapshot_id,
                     'VolumeSize': 250,
                     'VolumeType': 'gp2',
                     'Encrypted': False
