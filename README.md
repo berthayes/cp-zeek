@@ -1,5 +1,7 @@
 # Streaming Zeek Events with Apache Kafka and ksqlDB
-[Custom Start](https://github.com/berthayes/cp-zeek/#Custom-Start)
+## Custom Start
+[Custom Start](https://github.com/berthayes/cp-zeek/#Custom-Start) - Download a 1GB PCAP (~ 60 minutes) file from S3 or supply your own
+
 ## Quickstart
 - [Running on localhost](https://github.com/berthayes/cp-zeek/#Running-on-localhost)
 
@@ -8,6 +10,8 @@
 - [Starting the Connectors](https://github.com/berthayes/cp-zeek/#Starting-the-Connectors)
 
 - [Running on a bunch of EC2 hosts in AWS](https://github.com/berthayes/cp-zeek/blob/master/workshop_scripts/README.md)
+
+## ksqlDB Walkthrough
 
 [ksqlDB Walkthrough](ksqldb_walkthrough.md) - A guided walk through using ksqlDB to analyze Zeek and Syslog data.
 
@@ -68,16 +72,29 @@ This repository is a customization based on the Quick Start for Apache Kafka Usi
 
 ### Customize Your Environment
 
-This docker-compose.yml leverages an additional Docker image: [bertisondocker/zeek-tcpreplay-kafka](https://github.com/berthayes/zeek-tcpreplay-kafka) for generating [Zeek](https://zeek.org) data to stream to Apache Kafka in real time.  When the image runs, tcpreplay automatically starts reading `./pcaps/zeek-streamer.pcap`
+This docker-compose.yml leverages an additional Docker image: [bertisondocker/zeek-tcpreplay-kafka](https://github.com/berthayes/zeek-tcpreplay-kafka) for generating [Zeek](https://zeek.org) data to stream to Apache Kafka in real time.  When the image runs, tcpreplay automatically starts reading `./pcaps/zeek_streamer.pcap`
 
 To run this with the included packet capture simply run: 
 `docker-compose up -d`
 
-To analyze your own packet capture, Copy your pcap file to `./cp-zeek/pcaps/zeek-streamer.pcap` The zeek-streamer Docker image begins reading the zeek-streamer.pcap file automatically at startup.
+#### Analyze Your Own PCAP
+To analyze your own packet capture, Copy your pcap file to `./cp-zeek/pcaps/zeek_streamer.pcap` The zeek-streamer Docker image begins reading the zeek_streamer.pcap file automatically at startup.
 
 A super-fun pcap for analysis is available here:
-https://drive.google.com/open?id=1wMCm_ByWlkI4Zym_Stim-xUK4Zb4Zm5Q
+s3://bhayes-pcaps/garage-2020-10-18.pcap
 
-It's around 1GB in size and was originally captured over an hour or so.  The local network is 192.168.1.0/24 and there are maybe a dozen or so hosts that are active.  Some hosts are more active than others, and some hosts’ activities are more interesting than others.
+The `get_pcap_from_s3.py` script in the `workshop_scripts` directory will download this PCAP file and rename it to `zeek_streamer.pcap` for you.
 
-The Apache Kafka broker is configured to create topics automatically when it receives events.  As soon as the environment is up and running, events are streaming into Kafka with separate topics created for each flavor of Zeek logs.
+Edit `yak_shaving.conf` to read:
+```
+download_pcap = True
+```
+Optionally, edit the S3 bucket and object name to point to your own PCAP file.  Then run:
+```
+python3 get_pcap_from_s3.py
+```
+
+
+This packet capture is around 1GB in size and was originally captured over an hour or so.  The local network is 192.168.1.0/24 and there are maybe a dozen or so hosts that are active.  Some hosts are more active than others, and some hosts’ activities are more interesting than others.
+
+Have fun!

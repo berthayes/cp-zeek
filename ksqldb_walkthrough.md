@@ -526,3 +526,17 @@ You can look for all DNS lookups that match any host listed in the ad_hosts.csv 
 ```
 SELECT * FROM  MATCHED_DOMAINS_DNS EMIT CHANGES;
 ```
+
+## Creating a Table: Aggregate Bytes by Service
+
+If you've already created the CONN_STREAM in the examples above, you can run the following query to create a table from that stream:
+```sql
+CREATE TABLE 5MIN_BYTE_COUNTS AS
+SELECT "id.orig_h" AS LOCALIP,
+SERVICE,
+TIMESTAMPTOSTRING(WINDOWSTART, 'yyyy-MM-dd HH:mm:ss') AS window_start,
+TIMESTAMPTOSTRING(WINDOWEND, 'yyyy-MM-dd HH:mm:ss') AS window_end,
+SUM(ORIG_IP_BYTES + RESP_IP_BYTES) AS SUM_BYTES
+FROM CONN_STREAM WINDOW TUMBLING (SIZE 5 MINUTES)
+GROUP BY "id.orig_h", SERVICE;
+```
