@@ -1,6 +1,6 @@
 # Streaming Zeek Events with Apache Kafka and ksqlDB
 ## Custom Start
-[Custom Start](https://github.com/berthayes/cp-zeek/#Custom-Start) - Download a 1GB PCAP (~ 60 minutes) file from S3 or supply your own
+[Custom Start](https://github.com/berthayes/cp-zeek/#custom-start) - Download a 1GB PCAP (~ 60 minutes) file from S3 or supply your own
 
 ## Quickstart
 - [Running on localhost](https://github.com/berthayes/cp-zeek/#Running-on-localhost)
