@@ -14,6 +14,8 @@ This table of contents is provided as a reference.  Please note that each sectio
 - [Matching hostnames in a watchlist](https://github.com/berthayes/cp-zeek/blob/master/ksqldb_walkthrough.md#matching-hostnames-in-a-watchlist)
 
 ### Creating a Stream with Conn Data
+#### Monitoring for inbound connections
+
 
 A Zeek “conn” event looks like this:
 ```json
@@ -445,28 +447,14 @@ If you look under Topics, you should now see an topic called ad_hosts.
 
 Create a stream from this topic so that ksqlDB can process it:
 ```sql
-CREATE STREAM ADHOSTS_STREAM (
-  dateadded VARCHAR,
-  domain VARCHAR,
-  source VARCHAR)
-WITH (KAFKA_TOPIC='ad_hosts', VALUE_FORMAT='AVRO');
+CREATE STREAM ADHOSTS_STREAM WITH (KAFKA_TOPIC='adhosts', VALUE_FORMAT='AVRO');
 ```
-Now re-key the stream so that the HOST value is the key.  This step is critical because streams and tables can only be joined if they have the same key.
-
-```sql
-CREATE STREAM KEYED_HOSTS AS
-SELECT CAST(DATEADDED AS BIGINT) AS DATEADDED, DOMAIN AS HOSTNAME, SOURCE
-FROM  ADHOSTS_STREAM
-PARTITION BY DOMAIN
-EMIT CHANGES;
-```
-This query will result in a new topic called KEYED_HOSTS.
 
 Because joining a stream to a stream requires a time window, and we want to consider our list of bad hostnames as more of a static snapshot, we will create a table from this stream:
 
 ```sql
-CREATE TABLE adverts (dateadded BIGINT, hostname VARCHAR PRIMARY KEY, source VARCHAR)
-WITH (KAFKA_TOPIC='KEYED_HOSTS', VALUE_FORMAT='AVRO');
+CREATE TABLE adverts (id STRING, dateadded STRING, domain VARCHAR PRIMARY KEY, source VARCHAR)
+WITH (KAFKA_TOPIC='adhosts', VALUE_FORMAT='AVRO');;
 ```
 
 So now we have a table against which we can match streaming events.
@@ -505,22 +493,6 @@ INNER JOIN ADVERTS ADVERTS ON KEYED_DNS."query" = ADVERTS.HOSTNAME
 EMIT CHANGES;
 ```
 This query creates a new stream `MATCHED_DOMAINS_DNS` that is backed by a new topic, `matched_dnsThis query doesn't really turn up much, which tells me that these hosts aren't beingThis kind of query won't help if the ad server is using HTTPS since the HOST header field would be encrypted.  matching on HTTP HOST field, match on DNS lookups for that hostname.
-
-Create a new DNS stream that has the `"query"` value for its key:
-```sql
-CREATE STREAM KEYED_DNS WITH (KAFKA_TOPIC='keyed_dns', PARTITIONS=1, REPLICAS=1)
-AS SELECT * FROM  DNS_STREAM
-PARTITION BY "query"
-EMIT CHANGES;
-```
-Now create a new stream with a join where the DNS query value matches an ad server hostname:
-```sql
-CREATE STREAM MATCHED_DOMAINS_DNS WITH (KAFKA_TOPIC='matched_dns', PARTITIONS=1, REPLICAS=1)
-AS SELECT * FROM KEYED_DNS
-INNER JOIN ADVERTS ADVERTS ON KEYED_DNS."query" = ADVERTS.HOSTNAME
-EMIT CHANGES;
-```
-This creates a new stream called `MATCHED_DOMAINS_DNS` which is backed by a new topic, `matched_dns`.
 
 You can look for all DNS lookups that match any host listed in the ad_hosts.csv file with the following query:
 ```
