@@ -1,15 +1,24 @@
 {
-	"name": "ad_hosts",
-	"config": {
-	  "name": "ad_hosts",
-		"connector.class": "com.github.jcustenborder.kafka.connect.spooldir.SpoolDirCsvSourceConnector",
-		"tasks.max": "1",
-		"topic": "ad_hosts",
-		"input.path": "/var/spooldir/ad_hosts/csv_input",
-		"finished.path": "/var/spooldir/ad_hosts/csv_finished",
-		"error.path": "/var/spooldir/ad_hosts/csv_errors",
-	  "input.file.pattern": ".*\\.csv$",
-    "schema.generation.enabled": true,
-    "csv.first.row.as.header": true
-	}
+  "name": "adhosts",
+  "config": {
+    "value.converter.schema.registry.url": "http://schema-registry:8081",
+    "key.converter.schema.registry.url": "http://schema-registry:8081",
+    "name": "adhosts",
+    "connector.class": "com.github.jcustenborder.kafka.connect.spooldir.SpoolDirCsvSourceConnector",
+    "tasks.max": "1",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter": "io.confluent.connect.avro.AvroConverter",
+    "transforms": "ValueToKey,ExtractKey",
+    "transforms.ValueToKey.type": "org.apache.kafka.connect.transforms.ValueToKey",
+    "transforms.ValueToKey.fields": "domain",
+    "transforms.ExtractKey.type": "org.apache.kafka.connect.transforms.ExtractField$Key",
+    "transforms.ExtractKey.field": "domain",
+    "topic": "adhosts",
+    "input.path": "/var/spooldir/ad_hosts/csv_input",
+    "finished.path": "/var/spooldir/ad_hosts/csv_finished",
+    "error.path": "/var/spooldir/ad_hosts/csv_errors",
+    "input.file.pattern": ".*\\.csv$",
+    "schema.generation.enabled": "true",
+    "csv.first.row.as.header": "true"
+  }
 }
