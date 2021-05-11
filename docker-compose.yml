@@ -91,6 +91,8 @@ services:
         echo "Installing connector plugins"
         confluent-hub install --no-prompt jcustenborder/kafka-connect-spooldir:2.0.46
         confluent-hub install --no-prompt confluentinc/kafka-connect-syslog:latest
+        confluent-hub install --no-prompt confluentinc/kafka-connect-elasticsearch:11.0.4
+        confluent-hub install --no-prompt splunk/kafka-connect-splunk:2.0.2
         echo "Launching Kafka Connect worker"
         /etc/confluent/docker/run
 
@@ -108,8 +110,8 @@ services:
     environment:
       CONTROL_CENTER_BOOTSTRAP_SERVERS: 'broker:29092'
       CONTROL_CENTER_CONNECT_CLUSTER: 'connect:8083'
-      CONTROL_CENTER_KSQL_KSQLDB1_URL: "http://ksqldb-server:8088"
-      CONTROL_CENTER_KSQL_KSQLDB1_ADVERTISED_URL: "http://localhost:8088"
+      CONTROL_CENTER_KSQL_KSQLDB1_URL: "http://ksqldb-server:8080"
+      CONTROL_CENTER_KSQL_KSQLDB1_ADVERTISED_URL: "http://bert.confluentpublicsector.net:8080"
       CONTROL_CENTER_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
       CONTROL_CENTER_REPLICATION_FACTOR: 1
       CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 1
@@ -125,7 +127,7 @@ services:
       - broker
       - connect
     ports:
-      - "8088:8088"
+      - "8080:8080"
     volumes:
       - ./ksql-extension:/etc/ksql-extension/
       - ./mmdb:/opt/mmdb/
@@ -136,7 +138,7 @@ services:
       KSQL_KSQL_FUNCTIONS_GETASNFORIP_GEOCITY_DB_PATH: /opt/mmdb/GeoLite2-ASN.mmdb
       KSQL_BOOTSTRAP_SERVERS: "broker:29092"
       KSQL_HOST_NAME: ksqldb-server
-      KSQL_LISTENERS: "http://0.0.0.0:8088"
+      KSQL_LISTENERS: "http://0.0.0.0:8080"
       KSQL_CACHE_MAX_BYTES_BUFFERING: 0
       KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
       KSQL_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
@@ -187,3 +189,45 @@ services:
       - ./send-to-kafka.zeek:/usr/local/zeek/share/zeek/site/send-to-kafka.zeek
     cap_add: 
       - NET_ADMIN
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.0
+    container_name: elasticsearch
+    #restart: always
+    ports:
+      - 9200:9200
+      - 9300:9300
+    environment:
+      discovery.type: "single-node"
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+      cluster.name: "elasticsearch-cp-demo"
+
+  kibana:
+      image: docker.elastic.co/kibana/kibana-oss:7.10.0
+      container_name: kibana
+      restart: always
+      depends_on:
+        - elasticsearch
+      ports:
+        - 5601:5601
+      environment:
+        NEWSFEED_ENABLED: 'false'
+        TELEMETRY_OPTIN: 'false'
+        TELEMETRY_ENABLED: 'false'
+        SERVER_MAXPAYLOADBYTES: 4194304
+        KIBANA_AUTOCOMPLETETIMEOUT: 3000
+        KIBANA_AUTOCOMPLETETERMINATEAFTER: 2500000
+
+  splunk:
+    image: splunk/splunk:latest
+    container_name: splunk
+    hostname: splunk
+    environment:
+      - SPLUNK_START_ARGS=--accept-license
+      - SPLUNK_HEC_TOKEN=ef16f05f-40e0-4108-a644-5323e02aaa44
+      - SPLUNK_PASSWORD
+    ports:
+      - 8000:8000
+      - 8088:8088
+    volumes:
+      - ./default.yml:/tmp/defaults/default.yml

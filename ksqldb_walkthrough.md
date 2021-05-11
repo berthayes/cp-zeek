@@ -435,15 +435,17 @@ id,dateadded,domain,source
 8,1602886038,csh.actiondesk.com,https://winhelp2002.mvps.org/hosts.txt
 9,1602886038,ads.activepower.net,https://winhelp2002.mvps.org/hosts.txt
 ```
-To ingest this CSV file into a ne topic and automatically create a schema for that topic, start a new Spooldir connector to watch for this source:
+To ingest this CSV file into a new topic and automatically create a schema for that topic, start a new Spooldir connector to watch for this source.  If you have CLI access, you can run:
 ```
 ./start_adhosts_spooldir.sh
 ```
+Or you can upload the ```adhosts_spooldir.json``` file by clicking "Upload connector config file" from within the Confluent Control Center UI.
+
 Once this is started, or if it had already been started, the `ad_hosts.csv` file moves to:
 ```
 ./cp-zeek/spooldir/ad_hosts/csv_finished/ad_servers.csv
 ```
-If you look under Topics, you should now see an topic called ad_hosts.
+If you look under Topics, you should now see an topic called adhosts.
 
 Create a stream from this topic so that ksqlDB can process it:
 ```sql
@@ -454,7 +456,7 @@ Because joining a stream to a stream requires a time window, and we want to cons
 
 ```sql
 CREATE TABLE adverts (id STRING, dateadded STRING, domain VARCHAR PRIMARY KEY, source VARCHAR)
-WITH (KAFKA_TOPIC='adhosts', VALUE_FORMAT='AVRO');;
+WITH (KAFKA_TOPIC='adhosts', VALUE_FORMAT='AVRO');
 ```
 
 So now we have a table against which we can match streaming events.
