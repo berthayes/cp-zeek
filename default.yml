@@ -73,7 +73,7 @@ splunk:
     cert: null
     enable: true
     password: null
-    port: 8088
+    port: 8090
     ssl: true
     token: ef16f05f-40e0-4108-a644-5323e02aaa44
   home: /opt/splunk

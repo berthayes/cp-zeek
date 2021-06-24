@@ -51,7 +51,7 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'broker:29092'
 
   connect:
-    image: confluentinc/cp-server-connect:6.2.0
+    image: confluentinc/cp-server-connect-base:6.2.0
     hostname: connect
     container_name: connect
     depends_on:
@@ -110,8 +110,8 @@ services:
     environment:
       CONTROL_CENTER_BOOTSTRAP_SERVERS: 'broker:29092'
       CONTROL_CENTER_CONNECT_CONNECT-DEFAULT_CLUSTER: 'connect:8083'
-      CONTROL_CENTER_KSQL_KSQLDB1_URL: "http://ksqldb-server:8080"
-      CONTROL_CENTER_KSQL_KSQLDB1_ADVERTISED_URL: "http://localhost:8080"
+      CONTROL_CENTER_KSQL_KSQLDB1_URL: "http://ksqldb-server:8088"
+      CONTROL_CENTER_KSQL_KSQLDB1_ADVERTISED_URL: "http://localhost:8088"
       CONTROL_CENTER_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
       CONTROL_CENTER_REPLICATION_FACTOR: 1
       CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 1
@@ -127,7 +127,7 @@ services:
       - broker
       - connect
     ports:
-      - "8080:8080"
+      - "8088:8088"
     volumes:
       - ./ksql-extension:/etc/ksql-extension/
       - ./mmdb:/opt/mmdb/
@@ -138,7 +138,7 @@ services:
       KSQL_KSQL_FUNCTIONS_GETASNFORIP_GEOCITY_DB_PATH: /opt/mmdb/GeoLite2-ASN.mmdb
       KSQL_BOOTSTRAP_SERVERS: "broker:29092"
       KSQL_HOST_NAME: ksqldb-server
-      KSQL_LISTENERS: "http://0.0.0.0:8080"
+      KSQL_LISTENERS: "http://0.0.0.0:8088"
       KSQL_CACHE_MAX_BYTES_BUFFERING: 0
       KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
       KSQL_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
@@ -228,6 +228,6 @@ services:
       - SPLUNK_PASSWORD
     ports:
       - 8000:8000
-      - 8088:8088
+      - 8090:8090
     volumes:
       - ./default.yml:/tmp/defaults/default.yml
